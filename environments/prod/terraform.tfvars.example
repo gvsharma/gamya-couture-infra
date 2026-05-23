@@ -1,0 +1,21 @@
+# Copy to terraform.tfvars (gitignored) and fill in values.
+
+aws_region  = "ap-south-1"
+environment = "prod"
+project     = "gamya-couture"
+
+# Required: your home/office public IP for SSH
+admin_cidr = "203.0.113.10/32"
+
+# DNS (Phase 9+)
+domain_name   = "gamyacouture.com"
+api_subdomain = "api"
+www_subdomain = "www"
+
+# Database
+db_name               = "gamya"
+db_username           = "gamya_admin"
+enable_rds_schedule   = true
+
+# Compute
+ec2_instance_type = "t4g.micro"

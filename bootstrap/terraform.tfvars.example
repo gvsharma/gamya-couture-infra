@@ -1,0 +1,7 @@
+aws_region        = "ap-south-1"
+project           = "gamya-couture"
+state_bucket_name = "gamya-couture-tf-state"
+lock_table_name   = "gamya-couture-tf-locks"
+
+# Set false if you manage IAM policies outside Terraform.
+enable_iam_policy = true
