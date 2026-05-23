@@ -10,4 +10,4 @@ api_subdomain = "api-dev"
 www_subdomain = "dev"
 
 enable_rds_schedule = false
-ec2_instance_type   = "t4g.micro"
+ec2_instance_type = "t4g.small"

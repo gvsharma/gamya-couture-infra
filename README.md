@@ -47,13 +47,13 @@ Ops: SSM Session Manager (no bastion). SSH restricted to allowlisted IP.
 |-------|--------|--------|
 | **1** | Repo bootstrap, providers, tagging, env skeleton, backend docs | **Current** |
 | **2** | `modules/networking` — VPC, 2 public + 2 private subnets, IGW, routes (no NAT) | **Done** |
-| **3** | `modules/security` + `modules/iam` — SGs, SSM instance profile, least-privilege roles |
-| **4** | `modules/rds` — PostgreSQL `db.t4g.micro`, private, no snapshots |
-| **5** | `modules/rds-scheduler` — EventBridge (IST) stop 00:00 / start 07:00 |
-| **6** | `modules/ec2-app` — Docker host, user-data, SSM, SSH from your IP |
-| **7** | `modules/s3-static-site` + `modules/s3-media` |
-| **8** | `modules/cloudfront` + ACM (`us-east-1` for CloudFront) |
-| **9** | `modules/route53` — DNS + cert validation |
+| **3** | `modules/security-groups` — EC2/RDS SGs (SSM/IAM in ec2 module later) | **Done** |
+| **4** | `modules/rds` — PostgreSQL 16, SSM secrets, 4d logs | **Done** |
+| **5** | `modules/scheduler` — EventBridge Scheduler + Lambda (IST stop/start) | **Done** |
+| **6** | `modules/ec2` — AL2023 ARM, Docker, nginx, EIP, SSM, CW logs | **Done** |
+| **7** | `modules/s3` — frontend, images, videos buckets | **Done** |
+| **8** | `modules/cloudfront` — CDN, OAC, HTTPS, image-ready paths | **Done** |
+| **9** | `modules/route53`, `acm`, `route53-records` — DNS + TLS | **Done** |
 | **10** | `modules/cloudwatch` — 4-day retention, basic alarms |
 | **11** | Wire `environments/prod` (then `dev` with smaller flags) |
 

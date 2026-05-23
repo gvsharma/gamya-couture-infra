@@ -48,6 +48,11 @@ variable "www_subdomain" {
   default = "dev"
 }
 
+variable "admin_subdomain" {
+  type    = string
+  default = "admin"
+}
+
 variable "db_name" {
   type    = string
   default = "gamya_dev"
@@ -66,5 +71,10 @@ variable "enable_rds_schedule" {
 
 variable "ec2_instance_type" {
   type    = string
-  default = "t4g.micro"
+  default = "t4g.small"
+}
+
+variable "ec2_key_name" {
+  type    = string
+  default = null
 }

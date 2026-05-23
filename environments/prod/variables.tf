@@ -55,8 +55,8 @@ variable "admin_cidr" {
 
 variable "domain_name" {
   type        = string
-  description = "Root domain (e.g. gamyacouture.com)."
-  default     = ""
+  description = "Root domain (e.g. gamyacouture.com). Leave empty to skip Route53/ACM."
+  default     = "gamyacouture.com"
 }
 
 variable "api_subdomain" {
@@ -69,6 +69,12 @@ variable "www_subdomain" {
   type        = string
   description = "WWW / site hostname prefix."
   default     = "www"
+}
+
+variable "admin_subdomain" {
+  type        = string
+  description = "Admin / CRM hostname prefix."
+  default     = "admin"
 }
 
 # ------------------------------------------------------------------------------
@@ -97,5 +103,12 @@ variable "enable_rds_schedule" {
 
 variable "ec2_instance_type" {
   type        = string
-  default     = "t4g.micro"
+  description = "ARM Graviton instance for Docker / Spring Boot."
+  default     = "t4g.small"
+}
+
+variable "ec2_key_name" {
+  type        = string
+  description = "Optional EC2 key pair for SSH (SSM preferred)."
+  default     = null
 }
