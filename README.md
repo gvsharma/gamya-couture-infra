@@ -106,6 +106,8 @@ See [bootstrap/README.md](bootstrap/README.md) for IAM attachment and state migr
 
 See [docs/COST_AND_OPS.md](docs/COST_AND_OPS.md) for day-2 operations.
 
+See [docs/INFRASTRUCTURE_REVIEW.md](docs/INFRASTRUCTURE_REVIEW.md) for architecture review, cost estimate, security risks, and deployment order.
+
 ## Usage (after modules are added)
 
 ```bash
