@@ -4,8 +4,8 @@ One-time infrastructure to host Terraform state for **Gamya Couture** in **ap-so
 
 | Resource | Name | Purpose |
 |----------|------|---------|
-| S3 bucket | `gamya-couture-tf-state` | Versioned, encrypted state storage |
-| DynamoDB | `gamya-couture-tf-locks` | State locking (pay-per-request) |
+| S3 bucket | `gamya-couture-terraform-state` | Versioned, encrypted state storage |
+| DynamoDB | `terraform-locks` | State locking (pay-per-request) |
 | IAM policy | `gamya-couture-terraform-state-access` | Least-privilege operator access |
 
 **Cost:** Typically &lt; ₹100/month at low apply frequency (S3 storage + occasional DynamoDB lock writes).
@@ -42,7 +42,7 @@ bootstrap/
 
 - AWS CLI configured with permissions to create S3, DynamoDB, and IAM policies
 - Terraform ≥ 1.8
-- S3 bucket name `gamya-couture-tf-state` must be **globally unique** (change in `terraform.tfvars` if taken)
+- S3 bucket name `gamya-couture-terraform-state` must be **globally unique** (change in `terraform.tfvars` if taken)
 
 ## Deployment commands
 
@@ -96,8 +96,8 @@ Repeat for `dev` with `backend.dev.hcl`.
 ### 4. Verify
 
 ```bash
-aws s3 ls s3://gamya-couture-tf-state/
-aws dynamodb describe-table --table-name gamya-couture-tf-locks --region ap-south-1
+aws s3 ls s3://gamya-couture-terraform-state/
+aws dynamodb describe-table --table-name terraform-locks --region ap-south-1
 ```
 
 ## Backend configuration (environments)
@@ -124,8 +124,8 @@ Or copy values from `terraform output backend_config_prod` after bootstrap.
 
 | Environment | State key |
 |-------------|-----------|
-| prod | `prod/terraform.tfstate` |
-| dev | `dev/terraform.tfstate` |
+| prod | `infra/terraform.tfstate` |
+| dev | `infra/dev/terraform.tfstate` |
 
 Single bucket, isolated keys — no cross-environment state bleed.
 

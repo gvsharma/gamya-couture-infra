@@ -13,13 +13,13 @@ variable "project" {
 variable "state_bucket_name" {
   type        = string
   description = "Globally unique S3 bucket name for Terraform state."
-  default     = "gamya-couture-tf-state"
+  default     = "gamya-couture-terraform-state"
 }
 
 variable "lock_table_name" {
   type        = string
   description = "DynamoDB table name for Terraform state locking."
-  default     = "gamya-couture-tf-locks"
+  default     = "terraform-locks"
 }
 
 variable "terraform_state_iam_policy_name" {
