@@ -5,3 +5,8 @@ lock_table_name   = "gamya-couture-tf-locks"
 
 # Set false if you manage IAM policies outside Terraform.
 enable_iam_policy = true
+
+# GitHub Actions Terraform CI (OIDC — no long-lived AWS keys in GitHub)
+enable_github_actions       = true
+github_repository           = "gvsharma/gamya-couture-infra"
+create_github_oidc_provider = true

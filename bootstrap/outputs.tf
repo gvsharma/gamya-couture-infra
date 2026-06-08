@@ -44,3 +44,8 @@ output "backend_config_dev" {
     dynamodb_table = aws_dynamodb_table.terraform_locks.name
   }
 }
+
+output "github_terraform_role_arn" {
+  description = "IAM role ARN — set as GitHub repository variable AWS_TERRAFORM_ROLE_ARN."
+  value       = try(module.github_terraform[0].role_arn, null)
+}

@@ -146,6 +146,16 @@ Single bucket, isolated keys — no cross-environment state bleed.
 | AccessDenied on init | Attach `terraform_state_iam_policy_arn` to your IAM principal |
 | Error acquiring state lock | Check DynamoDB table exists; clear stale lock row only if sure no apply is running |
 
+## GitHub Actions (optional)
+
+Set `enable_github_actions = true` and `github_repository` in `terraform.tfvars`, then re-apply bootstrap to create an OIDC IAM role for CI.
+
+```bash
+terraform output -raw github_terraform_role_arn
+```
+
+Add that ARN as GitHub repository variable `AWS_TERRAFORM_ROLE_ARN`. See [docs/GITHUB_ACTIONS.md](../docs/GITHUB_ACTIONS.md).
+
 ## What this does not create
 
 No VPC, EC2, RDS, or application resources — remote state only.

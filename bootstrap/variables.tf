@@ -33,3 +33,26 @@ variable "enable_iam_policy" {
   description = "Create a reusable IAM policy for Terraform operators (attach to user/role manually)."
   default     = true
 }
+
+variable "enable_github_actions" {
+  type        = bool
+  description = "Create IAM role for GitHub Actions Terraform plan/apply via OIDC."
+  default     = false
+}
+
+variable "github_repository" {
+  type        = string
+  description = "GitHub repo for infra workflows (org/repo). Required when enable_github_actions is true."
+  default     = ""
+
+  validation {
+    condition     = !var.enable_github_actions || (var.github_repository != "" && can(regex("^[^/]+/[^/]+$", var.github_repository)))
+    error_message = "When enable_github_actions is true, github_repository must be set (e.g. gvsharma/gamya-couture-infra)."
+  }
+}
+
+variable "create_github_oidc_provider" {
+  type        = bool
+  description = "Create GitHub OIDC provider in this account (false if already exists)."
+  default     = true
+}
