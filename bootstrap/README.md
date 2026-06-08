@@ -154,7 +154,7 @@ Set `enable_github_actions = true` and `github_repository` in `terraform.tfvars`
 terraform output -raw github_terraform_role_arn
 ```
 
-Add that ARN as GitHub repository variable `AWS_TERRAFORM_ROLE_ARN`. See [docs/GITHUB_ACTIONS.md](../docs/GITHUB_ACTIONS.md).
+Add that ARN as GitHub repository secret `AWS_ROLE_ARN`. See [docs/GITHUB_ACTIONS.md](../docs/GITHUB_ACTIONS.md).
 
 ## What this does not create
 

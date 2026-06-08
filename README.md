@@ -41,7 +41,7 @@ gamya-couture-infra/
 │   ├── scheduler/                # RDS cost schedule
 │   ├── alb/                      # Future: load balancer
 │   └── README.md                 # Module index
-├── .github/workflows/            # Terraform plan/apply (manual approval)
+├── .github/workflows/terraform.yml  # CI: plan on PR, apply on push to main
 └── docs/
     ├── GITHUB_ACTIONS.md
     ├── COST_AND_OPS.md
@@ -94,7 +94,7 @@ terraform {
 
 ### 3. GitHub Actions (optional)
 
-See [docs/GITHUB_ACTIONS.md](docs/GITHUB_ACTIONS.md). Plan on PR; apply is **manual only**.
+See [docs/GITHUB_ACTIONS.md](docs/GITHUB_ACTIONS.md). Plan on PR; apply on merge to `main` (OIDC via `AWS_ROLE_ARN` secret).
 
 ## Architecture
 
@@ -148,4 +148,4 @@ All resources receive `default_tags` from `global/tags.tf`:
 
 1. Branch from `main`
 2. Open PR → Terraform plan runs automatically
-3. Merge does **not** apply — run **Terraform Apply** workflow manually when ready
+3. Merge to `main` triggers plan + apply (configure `production` environment reviewers optional)

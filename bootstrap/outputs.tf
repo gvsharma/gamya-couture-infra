@@ -46,6 +46,6 @@ output "backend_config_dev" {
 }
 
 output "github_terraform_role_arn" {
-  description = "IAM role ARN — set as GitHub repository variable AWS_TERRAFORM_ROLE_ARN."
+  description = "IAM role ARN — set as GitHub repository secret AWS_ROLE_ARN."
   value       = try(module.github_terraform[0].role_arn, null)
 }
