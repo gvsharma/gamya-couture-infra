@@ -7,6 +7,9 @@ lock_table_name   = "terraform-locks"
 enable_iam_policy = true
 
 # GitHub Actions Terraform CI (OIDC — no long-lived AWS keys in GitHub)
-enable_github_actions       = true
-github_repository           = "gvsharma/gamya-couture-infra"
-create_github_oidc_provider = true
+aws_account_id                    = "085863558134"
+enable_github_actions             = true
+github_repository                 = "gvsharma/gamya-couture-infra"
+github_terraform_role_name        = "GitHubTerraformRole"
+create_github_oidc_provider       = true
+github_attach_administrator_access = true

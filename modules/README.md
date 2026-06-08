@@ -2,7 +2,17 @@
 
 Reusable modules for **gamya-couture-infra**. Naming prefix: `gamya-couture-{environment}`.
 
-## Core (active)
+## Minimal API stack (Vercel backend)
+
+| Module | Purpose | Status |
+|--------|---------|--------|
+| [vpc-minimal](./vpc-minimal/) | VPC, 1 public subnet, IGW | **Active** |
+| [security-groups-api](./security-groups-api/) | API EC2 SG (HTTP/HTTPS + SSH) | **Active** |
+| [ec2-api](./ec2-api/) | AL2023 `t3.micro`, nginx | **Active** |
+
+Environment: [`environments/api`](../environments/api/)
+
+## Core (full prod)
 
 | Module | Purpose | Status |
 |--------|---------|--------|
@@ -33,7 +43,7 @@ Reusable modules for **gamya-couture-infra**. Naming prefix: `gamya-couture-{env
 |--------|---------|--------|
 | [alb](./alb/) | Application Load Balancer | **Planned** |
 | [ci-deploy-iam](./ci-deploy-iam/) | GitHub Actions frontend deploy | Optional |
-| [ci-terraform-iam](./ci-terraform-iam/) | GitHub Actions Terraform OIDC | Bootstrap |
+| [ci-terraform-iam](./ci-terraform-iam/) | GitHub OIDC + `GitHubTerraformRole` | [github-oidc/](../github-oidc/) or bootstrap |
 
 ## Legacy alias
 

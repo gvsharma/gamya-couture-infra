@@ -34,6 +34,12 @@ variable "enable_iam_policy" {
   default     = true
 }
 
+variable "aws_account_id" {
+  type        = string
+  description = "Expected AWS account ID (validated when GitHub Actions IAM is enabled)."
+  default     = "085863558134"
+}
+
 variable "enable_github_actions" {
   type        = bool
   description = "Create IAM role for GitHub Actions Terraform plan/apply via OIDC."
@@ -43,16 +49,28 @@ variable "enable_github_actions" {
 variable "github_repository" {
   type        = string
   description = "GitHub repo for infra workflows (org/repo). Required when enable_github_actions is true."
-  default     = ""
+  default     = "gvsharma/gamya-couture-infra"
 
   validation {
-    condition     = !var.enable_github_actions || (var.github_repository != "" && can(regex("^[^/]+/[^/]+$", var.github_repository)))
-    error_message = "When enable_github_actions is true, github_repository must be set (e.g. gvsharma/gamya-couture-infra)."
+    condition     = !var.enable_github_actions || can(regex("^[^/]+/[^/]+$", var.github_repository))
+    error_message = "github_repository must be org/repo format (e.g. gvsharma/gamya-couture-infra)."
   }
+}
+
+variable "github_terraform_role_name" {
+  type        = string
+  description = "IAM role name for GitHub Actions Terraform."
+  default     = "GitHubTerraformRole"
 }
 
 variable "create_github_oidc_provider" {
   type        = bool
   description = "Create GitHub OIDC provider in this account (false if already exists)."
+  default     = true
+}
+
+variable "github_attach_administrator_access" {
+  type        = bool
+  description = "Attach AdministratorAccess to GitHub Terraform role (scope down later)."
   default     = true
 }

@@ -1,8 +1,21 @@
+data "aws_caller_identity" "current" {}
+
 locals {
-  github_oidc_url       = "https://token.actions.githubusercontent.com"
-  oidc_subject_suffixes = length(var.allowed_ref_subjects) > 0 ? var.allowed_ref_subjects : var.default_allowed_subjects
-  oidc_subjects         = [for suffix in local.oidc_subject_suffixes : "repo:${var.github_repository}:${suffix}"]
+  github_oidc_url = "https://token.actions.githubusercontent.com"
+  oidc_audience   = replace(local.github_oidc_url, "https://", "")
 }
+
+check "expected_aws_account" {
+  assert {
+    condition     = data.aws_caller_identity.current.account_id == var.aws_account_id
+    error_message = "Applied to account ${data.aws_caller_identity.current.account_id}, expected ${var.aws_account_id}."
+  }
+}
+
+# ------------------------------------------------------------------------------
+# GitHub Actions OIDC identity provider
+# https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services
+# ------------------------------------------------------------------------------
 
 resource "aws_iam_openid_connect_provider" "github" {
   count = var.create_oidc_provider ? 1 : 0
@@ -10,6 +23,8 @@ resource "aws_iam_openid_connect_provider" "github" {
   url             = local.github_oidc_url
   client_id_list  = ["sts.amazonaws.com"]
   thumbprint_list = [var.github_oidc_thumbprint]
+
+  tags = var.tags
 }
 
 data "aws_iam_openid_connect_provider" "github" {
@@ -22,8 +37,13 @@ locals {
   oidc_provider_arn = var.create_oidc_provider ? aws_iam_openid_connect_provider.github[0].arn : data.aws_iam_openid_connect_provider.github[0].arn
 }
 
+# ------------------------------------------------------------------------------
+# IAM role trust policy — repo:gvsharma/gamya-couture-infra:*
+# ------------------------------------------------------------------------------
+
 data "aws_iam_policy_document" "github_assume_role" {
   statement {
+    sid    = "GitHubActionsOIDC"
     effect = "Allow"
 
     principals {
@@ -35,103 +55,34 @@ data "aws_iam_policy_document" "github_assume_role" {
 
     condition {
       test     = "StringEquals"
-      variable = "${replace(local.github_oidc_url, "https://", "")}:aud"
+      variable = "${local.oidc_audience}:aud"
       values   = ["sts.amazonaws.com"]
     }
 
     condition {
       test     = "StringLike"
-      variable = "${replace(local.github_oidc_url, "https://", "")}:sub"
-      values   = local.oidc_subjects
+      variable = "${local.oidc_audience}:sub"
+      values   = var.oidc_subjects
     }
   }
 }
 
 resource "aws_iam_role" "terraform" {
-  name_prefix        = "${var.name_prefix}-gh-tf-"
+  name               = var.role_name
   assume_role_policy = data.aws_iam_policy_document.github_assume_role.json
 
-  tags = {
-    Name = "${var.name_prefix}-github-terraform"
-  }
+  tags = merge(var.tags, {
+    Name = var.role_name
+  })
 }
 
-data "aws_iam_policy_document" "terraform_state" {
-  statement {
-    sid    = "ListStateBucket"
-    effect = "Allow"
-    actions = [
-      "s3:ListBucket",
-    ]
-    resources = [var.state_bucket_arn]
-  }
+# ------------------------------------------------------------------------------
+# Permissions — AdministratorAccess for now (replace with scoped policy later)
+# ------------------------------------------------------------------------------
 
-  statement {
-    sid    = "ReadWriteStateObjects"
-    effect = "Allow"
-    actions = [
-      "s3:GetObject",
-      "s3:PutObject",
-      "s3:DeleteObject",
-    ]
-    resources = ["${var.state_bucket_arn}/*"]
-  }
+resource "aws_iam_role_policy_attachment" "administrator_access" {
+  count = var.attach_administrator_access ? 1 : 0
 
-  statement {
-    sid    = "ManageStateLocks"
-    effect = "Allow"
-    actions = [
-      "dynamodb:DescribeTable",
-      "dynamodb:GetItem",
-      "dynamodb:PutItem",
-      "dynamodb:DeleteItem",
-    ]
-    resources = [var.lock_table_arn]
-  }
-}
-
-data "aws_iam_policy_document" "terraform_infra" {
-  statement {
-    sid    = "TerraformManagedServices"
-    effect = "Allow"
-    actions = [
-      "acm:*",
-      "cloudfront:*",
-      "ec2:*",
-      "events:*",
-      "iam:*",
-      "lambda:*",
-      "logs:*",
-      "rds:*",
-      "route53:*",
-      "s3:*",
-      "scheduler:*",
-      "ssm:*",
-    ]
-    resources = ["*"]
-  }
-
-  statement {
-    sid    = "ReadOnlyGlobal"
-    effect = "Allow"
-    actions = [
-      "ec2:Describe*",
-      "iam:Get*",
-      "iam:List*",
-      "sts:GetCallerIdentity",
-    ]
-    resources = ["*"]
-  }
-}
-
-resource "aws_iam_role_policy" "terraform_state" {
-  name_prefix = "${var.name_prefix}-gh-tf-state-"
-  role        = aws_iam_role.terraform.id
-  policy      = data.aws_iam_policy_document.terraform_state.json
-}
-
-resource "aws_iam_role_policy" "terraform_infra" {
-  name_prefix = "${var.name_prefix}-gh-tf-infra-"
-  role        = aws_iam_role.terraform.id
-  policy      = data.aws_iam_policy_document.terraform_infra.json
+  role       = aws_iam_role.terraform.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }

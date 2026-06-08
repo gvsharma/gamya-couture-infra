@@ -14,13 +14,22 @@ Uses **GitHub OIDC** — no AWS access keys.
 
 ## Setup
 
-### 1. AWS — GitHub OIDC role (bootstrap)
+### 1. AWS — GitHub OIDC role
+
+**Option A — standalone (recommended if state bucket already exists):**
+
+```bash
+cd github-oidc
+terraform init && terraform apply
+terraform output -raw role_arn
+# arn:aws:iam::085863558134:role/GitHubTerraformRole
+```
+
+**Option B — via bootstrap:**
 
 ```bash
 cd bootstrap
-# terraform.tfvars:
-#   enable_github_actions = true
-#   github_repository   = "gvsharma/gamya-couture-infra"
+# enable_github_actions = true in terraform.tfvars
 terraform apply
 terraform output -raw github_terraform_role_arn
 ```
