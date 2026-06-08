@@ -10,7 +10,7 @@ Reusable modules for **gamya-couture-infra**. Naming prefix: `gamya-couture-{env
 | [security-groups-api](./security-groups-api/) | API EC2 SG (HTTP/HTTPS + SSH) | **Active** |
 | [ec2-api](./ec2-api/) | AL2023 `t3.micro`, nginx | **Active** |
 
-Environment: [`environments/api`](../environments/api/)
+Environment: [`environments/dev`](../environments/dev/) (dev only)
 
 ## Core (full prod)
 

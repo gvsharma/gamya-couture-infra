@@ -59,7 +59,7 @@ variable "github_repository" {
 
 variable "github_terraform_role_name" {
   type        = string
-  description = "IAM role name for GitHub Actions Terraform."
+  description = "IAM role name for GitHub Actions Terraform (dev)."
   default     = "GitHubTerraformRole"
 }
 

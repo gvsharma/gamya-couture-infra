@@ -1,21 +1,16 @@
+# Dev only — minimal API backend for Vercel (ap-south-1)
+# Copy to terraform.tfvars (gitignored)
+
 aws_region  = "ap-south-1"
 environment = "dev"
 project     = "gamya-couture"
 
-# Prefer SSM; enable SSH only when debugging
-enable_ssh = false
+vpc_cidr = "10.50.0.0/16"
+
+# Your public IP (/32) — https://ifconfig.me
 admin_cidr = "203.0.113.10/32"
+enable_ssh = true
 
-# Dev API is reachable directly via EIP (no CloudFront API distribution without domain)
-restrict_web_ingress_to_cloudfront = false
-
-# Leave empty for *.cloudfront.net only; set for dev subdomains on your domain
-domain_name   = ""
-api_subdomain = "api-dev"
-www_subdomain = "dev"
-
-enable_rds_schedule = false
-ec2_instance_type     = "t4g.micro"
-
-# github_repository = "your-org/gamya-couture-web"
-# create_github_oidc_provider = false  # prod stack may already own the OIDC provider
+ec2_instance_type = "t3.micro"
+api_port          = 8080
+# ec2_key_name    = "my-keypair"

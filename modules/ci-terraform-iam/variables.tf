@@ -12,7 +12,7 @@ variable "github_repository" {
 
 variable "role_name" {
   type        = string
-  description = "IAM role name for GitHub Actions Terraform."
+  description = "IAM role name for GitHub Actions Terraform (dev)."
   default     = "GitHubTerraformRole"
 }
 
@@ -46,7 +46,7 @@ variable "tags" {
   default = {
     Project     = "gamya-couture"
     ManagedBy   = "terraform"
-    Environment = "shared"
-    Purpose     = "github-actions-terraform"
+    Environment = "dev"
+    Purpose     = "github-actions-terraform-dev"
   }
 }

@@ -94,7 +94,7 @@ terraform {
 
 ### 3. GitHub Actions (optional)
 
-See [docs/GITHUB_ACTIONS.md](docs/GITHUB_ACTIONS.md). Plan on PR; apply on merge to `main` (OIDC via `AWS_ROLE_ARN` secret).
+See [docs/GITHUB_ACTIONS.md](docs/GITHUB_ACTIONS.md). **CI deploys dev only** (`environments/dev`). Prod is manual until enabled.
 
 ## Architecture
 
@@ -148,4 +148,4 @@ All resources receive `default_tags` from `global/tags.tf`:
 
 1. Branch from `main`
 2. Open PR → Terraform plan runs automatically
-3. Merge to `main` triggers plan + apply (configure `production` environment reviewers optional)
+3. Merge to `main` triggers plan + apply for **dev** (GitHub Environment: `development`)

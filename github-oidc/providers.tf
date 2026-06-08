@@ -5,8 +5,8 @@ provider "aws" {
     tags = {
       Project     = "gamya-couture"
       ManagedBy   = "terraform"
-      Environment = "shared"
-      Purpose     = "github-actions-oidc"
+      Environment = "dev"
+      Purpose     = "github-actions-oidc-dev"
     }
   }
 }
