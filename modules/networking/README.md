@@ -1,3 +1,7 @@
+# networking (deprecated)
+
+> **Use [`modules/vpc`](../vpc/) instead.** This module is kept for backward compatibility only.
+
 # networking
 
 Reusable VPC module for Gamya Couture: one VPC, two public subnets (EC2), two private subnets (RDS), Internet Gateway, and route tables — **without a NAT Gateway**.

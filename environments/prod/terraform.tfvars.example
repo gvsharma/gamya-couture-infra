@@ -1,31 +1,33 @@
-# Copy to terraform.tfvars (gitignored) and fill in values.
+# Copy to terraform.tfvars (gitignored) and customize.
+# Naming prefix: gamya-couture-prod (project + environment)
 
 aws_region  = "ap-south-1"
 environment = "prod"
 project     = "gamya-couture"
 
-# SSH (disabled by default — use SSM Session Manager)
+# Network
+vpc_cidr = "10.0.0.0/16"
+
+# Security — prefer SSM Session Manager (enable_ssh = false)
 enable_ssh   = false
 admin_cidr   = "203.0.113.10/32"
-
-# Lock API origin to CloudFront only (recommended for prod)
 restrict_web_ingress_to_cloudfront = true
 
-# DNS — set domain_name = "" to use default *.cloudfront.net only
-domain_name     = "gamyacouture.com"
+# DNS — leave empty to use *.cloudfront.net until domain is ready
+domain_name     = ""
 api_subdomain   = "api"
 www_subdomain   = "www"
 admin_subdomain = "admin"
 
 # Database
-db_name               = "gamya"
-db_username           = "gamya_admin"
+db_name             = "gamya"
+db_username         = "gamya_admin"
 enable_rds_schedule = true
 
 # Compute
 ec2_instance_type = "t4g.small"
 # ec2_key_name      = "my-keypair"
 
-# CI/CD (optional — IAM only, no extra service cost)
-# github_repository = "your-org/gamya-couture-web"
+# CI/CD (optional)
+# github_repository = "gvsharma/gamya-couture-web"
 # create_github_oidc_provider = true

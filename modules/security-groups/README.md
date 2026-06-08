@@ -29,7 +29,7 @@ module "security_groups" {
   source = "../../modules/security-groups"
 
   name_prefix = "gamya-couture-prod"
-  vpc_id      = module.networking.vpc_id
+  vpc_id      = module.vpc.vpc_id
   admin_cidr  = "203.0.113.10/32"
 }
 ```

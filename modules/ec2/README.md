@@ -42,7 +42,7 @@ module "ec2" {
 
   name_prefix          = "gamya-couture-prod"
   environment          = "prod"
-  subnet_id            = module.networking.public_subnet_ids[0]
+  subnet_id            = module.vpc.public_subnet_ids[0]
   security_group_ids   = [module.security_groups.ec2_security_group_id]
   instance_type        = "t4g.small"
   key_name             = var.ec2_key_name # optional

@@ -15,8 +15,8 @@ locals {
   api_aliases = local.enable_custom_domain ? [local.api_fqdn, local.admin_fqdn] : []
 }
 
-module "networking" {
-  source = "../../modules/networking"
+module "vpc" {
+  source = "../../modules/vpc"
 
   name_prefix = local.name_prefix
   vpc_cidr    = var.vpc_cidr
@@ -26,7 +26,7 @@ module "security_groups" {
   source = "../../modules/security-groups"
 
   name_prefix                        = local.name_prefix
-  vpc_id                             = module.networking.vpc_id
+  vpc_id                             = module.vpc.vpc_id
   admin_cidr                         = var.admin_cidr
   enable_ssh                         = var.enable_ssh
   restrict_web_ingress_to_cloudfront = local.restrict_ec2_to_cloudfront
@@ -69,7 +69,7 @@ module "rds" {
   source = "../../modules/rds"
 
   name_prefix            = local.name_prefix
-  private_subnet_ids     = module.networking.private_subnet_ids
+  private_subnet_ids     = module.vpc.private_subnet_ids
   vpc_security_group_ids = [module.security_groups.rds_security_group_id]
   db_name                = var.db_name
   db_username            = var.db_username
@@ -81,7 +81,7 @@ module "ec2" {
 
   name_prefix        = local.name_prefix
   environment        = var.environment
-  subnet_id          = module.networking.public_subnet_ids[0]
+  subnet_id          = module.vpc.public_subnet_ids[0]
   security_group_ids = [module.security_groups.ec2_security_group_id]
   instance_type      = var.ec2_instance_type
   key_name           = var.ec2_key_name

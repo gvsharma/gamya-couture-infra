@@ -1,136 +1,151 @@
-# Gamya Couture — AWS Infrastructure (Terraform)
+# gamya-couture-infra
 
-Cost-optimized production infrastructure for the Gamya Couture boutique website and CRM MVP.
+Production-ready Terraform for **Gamya Couture** on AWS (`ap-south-1`).
 
 | Item | Value |
 |------|--------|
 | Region | `ap-south-1` (Mumbai) |
-| Budget target | ≤ ₹3,000 / month |
-| Traffic profile | ~500 website hits / day |
-| IaC | Terraform ≥ 1.8 |
-
-## Architecture (high level)
-
-```
-Internet
-   │
-   ├─► CloudFront ──► S3 (Next.js static export)
-   │
-   ├─► Route53 ──► EC2 (public subnet, Docker / Spring Boot)
-   │                    │
-   │                    └──► RDS PostgreSQL (private subnet, no public access)
-   │
-   └─► S3 (product media) ◄── EC2 via IAM (no NAT, no VPC endpoints)
-
-Ops: SSM Session Manager (no bastion). SSH restricted to allowlisted IP.
-```
-
-**Explicitly excluded:** NAT Gateway, ALB, ECS/EKS, Lambda backend, Aurora, CodePipeline, VPC endpoints, Transit Gateway.
-
-## Cost model (approximate)
-
-| Resource | Notes | ~USD/mo |
-|----------|--------|---------|
-| EC2 `t4g.micro` | Single app host, 8 GB gp3 root | 6–8 |
-| RDS `db.t4g.micro` | gp3 20 GB; stopped 00:00–07:00 IST (~29% off compute) | 8–12 |
-| S3 + CloudFront | Low traffic static + media | 1–3 |
-| Route53 | 1 hosted zone + queries | 1 |
-| CloudWatch | 4-day retention, few alarms | 1–2 |
-| EBS snapshots | None for RDS (per spec) | 0 |
-| **NAT / ALB / ECS** | **Not used** | **0** |
-
-≈ **$20–28 USD** (~₹1,700–2,400) with disciplined usage — leaves headroom for data transfer spikes.
-
-## Incremental delivery plan
-
-| Phase | Scope | Status |
-|-------|--------|--------|
-| **1** | Repo bootstrap, providers, tagging, env skeleton, backend docs | **Current** |
-| **2** | `modules/networking` — VPC, 2 public + 2 private subnets, IGW, routes (no NAT) | **Done** |
-| **3** | `modules/security-groups` — EC2/RDS SGs (SSM/IAM in ec2 module later) | **Done** |
-| **4** | `modules/rds` — PostgreSQL 16, SSM secrets, 4d logs | **Done** |
-| **5** | `modules/scheduler` — EventBridge Scheduler + Lambda (IST stop/start) | **Done** |
-| **6** | `modules/ec2` — AL2023 ARM, Docker, nginx, EIP, SSM, CW logs | **Done** |
-| **7** | `modules/s3` — frontend, images, videos buckets | **Done** |
-| **8** | `modules/cloudfront` — CDN, OAC, HTTPS, image-ready paths | **Done** |
-| **9** | `modules/route53`, `acm`, `route53-records` — DNS + TLS | **Done** |
-| **10** | `modules/cloudwatch` — 4-day retention, basic alarms |
-| **11** | Wire `environments/prod` (then `dev` with smaller flags) |
+| Terraform | `>= 1.9.0` |
+| Naming prefix | `gamya-couture` |
+| State bucket | `gamya-couture-terraform-state` |
+| State lock table | `terraform-locks` |
+| Prod state key | `infra/terraform.tfstate` |
 
 ## Repository layout
 
 ```
 gamya-couture-infra/
-├── README.md                 # This file
-├── .gitignore
-├── bootstrap/                # S3 state + DynamoDB locks (apply once)
-├── docs/
-│   └── COST_AND_OPS.md       # Runbooks, cost levers
-├── global/
-│   └── tags.tf               # Shared default_tags for all modules
+├── README.md
+├── bootstrap/                    # One-time: S3 state + DynamoDB + GitHub OIDC (optional)
+├── global/                       # Shared default_tags
 ├── environments/
-│   ├── dev/                  # Smaller / optional RDS schedule overrides
-│   └── prod/                 # Production root module composition
-└── modules/
-    ├── networking/
-    ├── security/
-    ├── iam/
-    ├── rds/
-    ├── rds-scheduler/
-    ├── ec2-app/
-    ├── s3-static-site/
-    ├── s3-media/
-    ├── cloudfront/
-    ├── route53/
-    └── cloudwatch/
+│   └── prod/                     # Production stack
+│       ├── backend.tf            # S3 remote backend (embedded)
+│       ├── providers.tf          # AWS providers ap-south-1 + us-east-1
+│       ├── variables.tf
+│       ├── locals.tf
+│       ├── main.tf               # Module composition
+│       ├── outputs.tf
+│       ├── ci.tfvars             # Non-secret defaults for GitHub Actions
+│       └── terraform.tfvars.example
+├── modules/
+│   ├── vpc/                      # VPC, subnets, IGW
+│   ├── security-groups/          # EC2 + RDS SGs
+│   ├── ec2/                      # Application server
+│   ├── rds/                      # PostgreSQL
+│   ├── s3/                       # Static + media buckets
+│   ├── cloudfront/               # CDN
+│   ├── route53/                  # DNS zone
+│   ├── route53-records/          # DNS records
+│   ├── acm/                      # TLS (us-east-1)
+│   ├── scheduler/                # RDS cost schedule
+│   ├── alb/                      # Future: load balancer
+│   └── README.md                 # Module index
+├── .github/workflows/            # Terraform plan/apply (manual approval)
+└── docs/
+    ├── GITHUB_ACTIONS.md
+    ├── COST_AND_OPS.md
+    └── INFRASTRUCTURE_REVIEW.md
 ```
 
 ## Prerequisites
 
-1. AWS account with billing alerts (recommend ₹2,500 warning).
-2. Terraform ≥ 1.8, AWS CLI v2 configured.
-3. Domain in Route53 (or ready to delegate NS).
-4. Your public IP for SSH allowlist (`/32`).
+1. [Terraform](https://developer.hashicorp.com/terraform/install) `>= 1.9.0`
+2. [AWS CLI](https://aws.amazon.com/cli/) configured (`aws sts get-caller-identity`)
+3. S3 bucket **`gamya-couture-terraform-state`** and DynamoDB table **`terraform-locks`** in `ap-south-1` (create via `bootstrap/` or manually)
 
-## Bootstrap (remote state)
+## Quick start
 
-One-time setup in [`bootstrap/`](bootstrap/README.md):
+### 1. Remote state (if not already created)
 
 ```bash
-cd bootstrap && terraform init && terraform apply
-cd ../environments/prod
-terraform init -backend-config=../../bootstrap/examples/backend.prod.hcl
+cd bootstrap
+cp terraform.tfvars.example terraform.tfvars
+terraform init && terraform apply
 ```
 
-See [bootstrap/README.md](bootstrap/README.md) for IAM attachment and state migration.
+Skip if your bucket and lock table already exist.
 
-See [docs/COST_AND_OPS.md](docs/COST_AND_OPS.md) for day-2 operations.
-
-See [docs/INFRASTRUCTURE_REVIEW.md](docs/INFRASTRUCTURE_REVIEW.md) for architecture review, cost estimate, security risks, and deployment order.
-
-## Usage (after modules are added)
+### 2. Deploy production
 
 ```bash
 cd environments/prod
 cp terraform.tfvars.example terraform.tfvars
-# edit terraform.tfvars
+# Edit terraform.tfvars
+
 terraform init
 terraform plan
 terraform apply
 ```
 
-## Tagging strategy
+`backend.tf` is preconfigured:
 
-All resources inherit:
+```hcl
+terraform {
+  backend "s3" {
+    bucket         = "gamya-couture-terraform-state"
+    key            = "infra/terraform.tfstate"
+    region         = "ap-south-1"
+    dynamodb_table = "terraform-locks"
+    encrypt        = true
+  }
+}
+```
+
+### 3. GitHub Actions (optional)
+
+See [docs/GITHUB_ACTIONS.md](docs/GITHUB_ACTIONS.md). Plan on PR; apply is **manual only**.
+
+## Architecture
+
+```
+Internet
+   ├─► CloudFront ──► S3 (Next.js static)
+   ├─► Route53 ──► EC2 (Docker / API) ──► RDS PostgreSQL (private)
+   └─► S3 media ◄── EC2 (IAM)
+```
+
+**Cost choices:** no NAT Gateway, no ALB, RDS scheduled off-hours (optional).
+
+## Modules
+
+| Layer | Module | Description |
+|-------|--------|-------------|
+| Network | `vpc` | VPC, 2 public + 2 private subnets, IGW |
+| Security | `security-groups` | EC2 + RDS rules |
+| Compute | `ec2` | ARM instance, EIP, SSM |
+| Data | `rds` | PostgreSQL 16 |
+| Storage | `s3` | Frontend, images, videos |
+| Edge | `cloudfront`, `route53`, `acm` | HTTPS CDN + DNS |
+| Future | `alb` | Placeholder for load balancer |
+
+## Tagging
+
+All resources receive `default_tags` from `global/tags.tf`:
 
 | Tag | Example |
 |-----|---------|
 | `Project` | `gamya-couture` |
-| `Environment` | `prod` / `dev` |
+| `Environment` | `prod` |
 | `ManagedBy` | `terraform` |
-| `Owner` | `platform` |
-| `CostCenter` | `mvp` |
+
+## Conventions
+
+- **Name prefix:** `{project}-{environment}` → `gamya-couture-prod`
+- **One state file per environment** under `infra/` prefix in the state bucket
+- **Secrets:** gitignored `terraform.tfvars`; CI uses `ci.tfvars`
+- **Fmt:** `terraform fmt -recursive` before commit
+
+## Documentation
+
+- [Module index](modules/README.md)
+- [Bootstrap / state](bootstrap/README.md)
+- [GitHub Actions CI](docs/GITHUB_ACTIONS.md)
+- [Cost & operations](docs/COST_AND_OPS.md)
+- [Architecture review](docs/INFRASTRUCTURE_REVIEW.md)
 
 ## Contributing
 
-One module per PR phase. Run `terraform fmt -recursive` before commit.
+1. Branch from `main`
+2. Open PR → Terraform plan runs automatically
+3. Merge does **not** apply — run **Terraform Apply** workflow manually when ready

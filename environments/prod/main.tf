@@ -1,26 +1,16 @@
 # ------------------------------------------------------------------------------
-# Root composition
+# Gamya Couture — production root module (ap-south-1)
+# Naming prefix: gamya-couture-prod (var.project + var.environment)
 # ------------------------------------------------------------------------------
 
 data "aws_caller_identity" "current" {}
 
-locals {
-  name_prefix               = "${var.project}-${var.environment}"
-  db_parameter_store_prefix = "/${var.project}/${var.environment}/db"
+# ------------------------------------------------------------------------------
+# Core network & compute (required)
+# ------------------------------------------------------------------------------
 
-  enable_custom_domain       = var.domain_name != ""
-  restrict_ec2_to_cloudfront    = var.restrict_web_ingress_to_cloudfront && local.enable_custom_domain
-  www_fqdn                      = "${var.www_subdomain}.${var.domain_name}"
-  api_fqdn             = "${var.api_subdomain}.${var.domain_name}"
-  admin_fqdn           = "${var.admin_subdomain}.${var.domain_name}"
-  origin_api_fqdn      = "origin-api.${var.domain_name}"
-
-  web_aliases = local.enable_custom_domain ? [var.domain_name, local.www_fqdn] : []
-  api_aliases = local.enable_custom_domain ? [local.api_fqdn, local.admin_fqdn] : []
-}
-
-module "networking" {
-  source = "../../modules/networking"
+module "vpc" {
+  source = "../../modules/vpc"
 
   name_prefix = local.name_prefix
   vpc_cidr    = var.vpc_cidr
@@ -29,13 +19,17 @@ module "networking" {
 module "security_groups" {
   source = "../../modules/security-groups"
 
-  name_prefix                          = local.name_prefix
-  vpc_id                               = module.networking.vpc_id
-  admin_cidr                           = var.admin_cidr
-  enable_ssh                           = var.enable_ssh
+  name_prefix                        = local.name_prefix
+  vpc_id                             = module.vpc.vpc_id
+  admin_cidr                         = var.admin_cidr
+  enable_ssh                         = var.enable_ssh
   restrict_web_ingress_to_cloudfront = local.restrict_ec2_to_cloudfront
   web_ingress_cidr_blocks            = var.web_ingress_cidr_blocks
 }
+
+# ------------------------------------------------------------------------------
+# DNS & TLS (optional — set domain_name in tfvars)
+# ------------------------------------------------------------------------------
 
 module "route53" {
   count  = local.enable_custom_domain ? 1 : 0
@@ -61,38 +55,15 @@ module "acm" {
   route53_zone_id = module.route53[0].zone_id
 }
 
+# ------------------------------------------------------------------------------
+# Storage & CDN
+# ------------------------------------------------------------------------------
+
 module "s3" {
   source = "../../modules/s3"
 
   name_prefix   = local.name_prefix
   bucket_suffix = data.aws_caller_identity.current.account_id
-}
-
-module "rds" {
-  source = "../../modules/rds"
-
-  name_prefix            = local.name_prefix
-  private_subnet_ids     = module.networking.private_subnet_ids
-  vpc_security_group_ids = [module.security_groups.rds_security_group_id]
-  db_name                = var.db_name
-  db_username            = var.db_username
-  parameter_store_prefix = local.db_parameter_store_prefix
-}
-
-module "ec2" {
-  source = "../../modules/ec2"
-
-  name_prefix        = local.name_prefix
-  environment        = var.environment
-  subnet_id          = module.networking.public_subnet_ids[0]
-  security_group_ids = [module.security_groups.ec2_security_group_id]
-  instance_type      = var.ec2_instance_type
-  key_name           = var.ec2_key_name
-
-  additional_iam_policy_arns = compact([
-    module.rds.db_secrets_read_policy_arn,
-    module.s3.ec2_media_upload_policy_arn,
-  ])
 }
 
 module "cloudfront" {
@@ -141,6 +112,37 @@ module "route53_records" {
   api_cloudfront_zone_id     = module.cloudfront.api_distribution_hosted_zone_id
 }
 
+# ------------------------------------------------------------------------------
+# Database & cost scheduler
+# ------------------------------------------------------------------------------
+
+module "rds" {
+  source = "../../modules/rds"
+
+  name_prefix            = local.name_prefix
+  private_subnet_ids     = module.vpc.private_subnet_ids
+  vpc_security_group_ids = [module.security_groups.rds_security_group_id]
+  db_name                = var.db_name
+  db_username            = var.db_username
+  parameter_store_prefix = local.db_parameter_store_prefix
+}
+
+module "ec2" {
+  source = "../../modules/ec2"
+
+  name_prefix        = local.name_prefix
+  environment        = var.environment
+  subnet_id          = module.vpc.public_subnet_ids[0]
+  security_group_ids = [module.security_groups.ec2_security_group_id]
+  instance_type      = var.ec2_instance_type
+  key_name           = var.ec2_key_name
+
+  additional_iam_policy_arns = compact([
+    module.rds.db_secrets_read_policy_arn,
+    module.s3.ec2_media_upload_policy_arn,
+  ])
+}
+
 module "scheduler" {
   count  = var.enable_rds_schedule ? 1 : 0
   source = "../../modules/scheduler"
@@ -150,6 +152,10 @@ module "scheduler" {
   db_instance_arn        = module.rds.db_instance_arn
   enabled                = true
 }
+
+# ------------------------------------------------------------------------------
+# CI/CD (optional)
+# ------------------------------------------------------------------------------
 
 module "ci_deploy" {
   count  = var.github_repository != "" ? 1 : 0
@@ -161,3 +167,7 @@ module "ci_deploy" {
   cloudfront_distribution_arn = module.cloudfront.distribution_arn
   create_oidc_provider        = var.create_github_oidc_provider
 }
+
+# ------------------------------------------------------------------------------
+# Future: ALB (modules/alb) — wire when migrating API behind a load balancer
+# ------------------------------------------------------------------------------

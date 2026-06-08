@@ -1,5 +1,9 @@
-# Remote state — run bootstrap first, then:
-#   terraform init -backend-config=../../bootstrap/examples/backend.prod.hcl
 terraform {
-  backend "s3" {}
+  backend "s3" {
+    bucket         = "gamya-couture-terraform-state"
+    key            = "infra/terraform.tfstate"
+    region         = "ap-south-1"
+    dynamodb_table = "terraform-locks"
+    encrypt        = true
+  }
 }

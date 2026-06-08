@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.8.0"
+  required_version = ">= 1.9.0"
 
   required_providers {
     aws = {
@@ -17,7 +17,7 @@ provider "aws" {
   }
 }
 
-# CloudFront ACM certificates must be in us-east-1.
+# ACM for CloudFront must be in us-east-1.
 provider "aws" {
   alias  = "us_east_1"
   region = "us-east-1"

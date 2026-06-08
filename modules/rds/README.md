@@ -35,7 +35,7 @@ module "rds" {
   source = "../../modules/rds"
 
   name_prefix            = "gamya-couture-prod"
-  private_subnet_ids     = module.networking.private_subnet_ids
+  private_subnet_ids     = module.vpc.private_subnet_ids
   vpc_security_group_ids = [module.security_groups.rds_security_group_id]
   db_name                = "gamya"
   db_username            = "gamya_admin"
