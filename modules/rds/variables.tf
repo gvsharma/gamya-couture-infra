@@ -71,3 +71,4 @@ variable "password_rotation_trigger" {
   default     = "1"
   sensitive   = true
 }
+

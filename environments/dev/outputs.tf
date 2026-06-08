@@ -85,3 +85,15 @@ output "cloudfront_url" {
 output "cloudfront_distribution_id" {
   value = module.cloudfront.distribution_id
 }
+
+output "github_deploy_role_arn" {
+  value = try(module.ci_deploy[0].deploy_role_arn, null)
+}
+
+output "website_url" {
+  value = try(module.route53_records[0].website_urls.www, module.cloudfront.frontend_url)
+}
+
+output "api_url" {
+  value = try(module.route53_records[0].api_url, "http://${module.ec2.public_ip}")
+}

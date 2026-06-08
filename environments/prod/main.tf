@@ -8,8 +8,9 @@ locals {
   name_prefix               = "${var.project}-${var.environment}"
   db_parameter_store_prefix = "/${var.project}/${var.environment}/db"
 
-  enable_custom_domain = var.domain_name != ""
-  www_fqdn             = "${var.www_subdomain}.${var.domain_name}"
+  enable_custom_domain       = var.domain_name != ""
+  restrict_ec2_to_cloudfront    = var.restrict_web_ingress_to_cloudfront && local.enable_custom_domain
+  www_fqdn                      = "${var.www_subdomain}.${var.domain_name}"
   api_fqdn             = "${var.api_subdomain}.${var.domain_name}"
   admin_fqdn           = "${var.admin_subdomain}.${var.domain_name}"
   origin_api_fqdn      = "origin-api.${var.domain_name}"
@@ -28,9 +29,12 @@ module "networking" {
 module "security_groups" {
   source = "../../modules/security-groups"
 
-  name_prefix = local.name_prefix
-  vpc_id      = module.networking.vpc_id
-  admin_cidr  = var.admin_cidr
+  name_prefix                          = local.name_prefix
+  vpc_id                               = module.networking.vpc_id
+  admin_cidr                           = var.admin_cidr
+  enable_ssh                           = var.enable_ssh
+  restrict_web_ingress_to_cloudfront = local.restrict_ec2_to_cloudfront
+  web_ingress_cidr_blocks            = var.web_ingress_cidr_blocks
 }
 
 module "route53" {
@@ -145,4 +149,15 @@ module "scheduler" {
   db_instance_identifier = module.rds.db_instance_id
   db_instance_arn        = module.rds.db_instance_arn
   enabled                = true
+}
+
+module "ci_deploy" {
+  count  = var.github_repository != "" ? 1 : 0
+  source = "../../modules/ci-deploy-iam"
+
+  name_prefix                 = local.name_prefix
+  github_repository           = var.github_repository
+  frontend_bucket_arn         = module.s3.frontend_bucket_arn
+  cloudfront_distribution_arn = module.cloudfront.distribution_arn
+  create_oidc_provider        = var.create_github_oidc_provider
 }

@@ -30,7 +30,26 @@ variable "vpc_cidr" {
 
 variable "admin_cidr" {
   type        = string
-  description = "SSH allowlist CIDR."
+  description = "SSH allowlist CIDR when enable_ssh is true (must be /32)."
+  default     = "127.0.0.1/32"
+}
+
+variable "enable_ssh" {
+  type        = bool
+  description = "Allow SSH to EC2. Dev may enable for debugging; prefer SSM."
+  default     = false
+}
+
+variable "restrict_web_ingress_to_cloudfront" {
+  type        = bool
+  description = "Restrict EC2 HTTP/HTTPS to CloudFront. Set false for direct API testing via EIP."
+  default     = false
+}
+
+variable "web_ingress_cidr_blocks" {
+  type        = list(string)
+  description = "HTTP/HTTPS CIDR allowlist when CloudFront restriction is disabled."
+  default     = ["0.0.0.0/0"]
 }
 
 variable "domain_name" {
@@ -50,7 +69,7 @@ variable "www_subdomain" {
 
 variable "admin_subdomain" {
   type    = string
-  default = "admin"
+  default = "admin-dev"
 }
 
 variable "db_name" {
@@ -65,16 +84,28 @@ variable "db_username" {
 
 variable "enable_rds_schedule" {
   type        = bool
-  description = "Dev can disable schedule or share smaller window."
+  description = "Stop RDS overnight in dev."
   default     = false
 }
 
 variable "ec2_instance_type" {
   type    = string
-  default = "t4g.small"
+  default = "t4g.micro"
 }
 
 variable "ec2_key_name" {
   type    = string
   default = null
+}
+
+variable "github_repository" {
+  type        = string
+  description = "GitHub repo for frontend deploy OIDC. Leave empty to skip."
+  default     = ""
+}
+
+variable "create_github_oidc_provider" {
+  type        = bool
+  description = "Create GitHub OIDC provider (set false if prod already created it)."
+  default     = false
 }

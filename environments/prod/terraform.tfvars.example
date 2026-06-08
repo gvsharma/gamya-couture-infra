@@ -4,8 +4,12 @@ aws_region  = "ap-south-1"
 environment = "prod"
 project     = "gamya-couture"
 
-# Required: your home/office public IP for SSH
-admin_cidr = "203.0.113.10/32"
+# SSH (disabled by default — use SSM Session Manager)
+enable_ssh   = false
+admin_cidr   = "203.0.113.10/32"
+
+# Lock API origin to CloudFront only (recommended for prod)
+restrict_web_ingress_to_cloudfront = true
 
 # DNS — set domain_name = "" to use default *.cloudfront.net only
 domain_name     = "gamyacouture.com"
@@ -16,8 +20,12 @@ admin_subdomain = "admin"
 # Database
 db_name               = "gamya"
 db_username           = "gamya_admin"
-enable_rds_schedule   = true
+enable_rds_schedule = true
 
 # Compute
 ec2_instance_type = "t4g.small"
 # ec2_key_name      = "my-keypair"
+
+# CI/CD (optional — IAM only, no extra service cost)
+# github_repository = "your-org/gamya-couture-web"
+# create_github_oidc_provider = true

@@ -195,3 +195,8 @@ output "admin_url" {
   description = "Production admin URL."
   value       = try(module.route53_records[0].admin_url, null)
 }
+
+output "github_deploy_role_arn" {
+  description = "IAM role ARN for GitHub Actions frontend deploy."
+  value       = try(module.ci_deploy[0].deploy_role_arn, null)
+}

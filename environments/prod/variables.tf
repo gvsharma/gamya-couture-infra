@@ -46,7 +46,26 @@ variable "vpc_cidr" {
 
 variable "admin_cidr" {
   type        = string
-  description = "Your public IP in CIDR notation for SSH (e.g. 203.0.113.10/32)."
+  description = "Your public IP in CIDR notation for SSH when enable_ssh is true (must be /32)."
+  default     = "127.0.0.1/32"
+}
+
+variable "enable_ssh" {
+  type        = bool
+  description = "Allow SSH to EC2 from admin_cidr. Prefer false; use SSM Session Manager."
+  default     = false
+}
+
+variable "restrict_web_ingress_to_cloudfront" {
+  type        = bool
+  description = "Restrict EC2 HTTP/HTTPS to CloudFront origin-facing IPs only."
+  default     = true
+}
+
+variable "web_ingress_cidr_blocks" {
+  type        = list(string)
+  description = "HTTP/HTTPS CIDR allowlist when CloudFront restriction is disabled."
+  default     = ["0.0.0.0/0"]
 }
 
 # ------------------------------------------------------------------------------
@@ -111,4 +130,20 @@ variable "ec2_key_name" {
   type        = string
   description = "Optional EC2 key pair for SSH (SSM preferred)."
   default     = null
+}
+
+# ------------------------------------------------------------------------------
+# CI/CD (optional — IAM only, no extra AWS service cost)
+# ------------------------------------------------------------------------------
+
+variable "github_repository" {
+  type        = string
+  description = "GitHub repo (org/repo) for frontend deploy OIDC role. Leave empty to skip."
+  default     = ""
+}
+
+variable "create_github_oidc_provider" {
+  type        = bool
+  description = "Create GitHub OIDC provider (false if already exists in account)."
+  default     = true
 }
