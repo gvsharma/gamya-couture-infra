@@ -1,6 +1,6 @@
 resource "aws_security_group" "api" {
   name_prefix = "${var.name_prefix}-api-"
-  description = "Gamya Couture API EC2 — HTTP/HTTPS public, SSH restricted."
+  description = "Gamya Couture API EC2 - HTTP/HTTPS public, SSH restricted."
   vpc_id      = var.vpc_id
 
   lifecycle {
