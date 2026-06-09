@@ -41,16 +41,16 @@ module "backend_deploy_artifacts" {
 module "ec2" {
   source = "../../modules/ec2-api"
 
-  name_prefix        = local.name_prefix
-  subnet_id          = module.vpc.public_subnet_id
-  security_group_ids = [module.security_groups.security_group_id]
-  instance_type      = var.ec2_instance_type
-  key_name           = var.ec2_key_name
-  api_port           = var.api_port
+  name_prefix         = local.name_prefix
+  subnet_id           = module.vpc.public_subnet_id
+  security_group_ids  = [module.security_groups.security_group_id]
+  instance_type       = var.ec2_instance_type
+  key_name            = var.ec2_key_name
+  api_port            = var.api_port
   ssh_authorized_keys = var.ssh_authorized_keys
-  db_endpoint        = module.rds.db_endpoint
-  db_name            = var.db_name
-  db_username        = var.db_username
+  db_endpoint         = module.rds.db_endpoint
+  db_name             = var.db_name
+  db_username         = var.db_username
 
   # cloud-init runs at launch only — replace EC2 when bootstrap content changes.
   user_data_replace_on_change = length(var.ssh_authorized_keys) > 0 || var.enable_backend_ssm_deploy
@@ -65,10 +65,10 @@ module "ci_backend_deploy" {
   count  = var.enable_backend_ssm_deploy ? 1 : 0
   source = "../../modules/ci-backend-deploy-iam"
 
-  name_prefix       = local.name_prefix
-  github_repository = var.github_backend_repository
-  deploy_bucket_arn = module.backend_deploy_artifacts[0].bucket_arn
-  ec2_instance_arn  = module.ec2.instance_arn
+  name_prefix          = local.name_prefix
+  github_repository    = var.github_backend_repository
+  deploy_bucket_arn    = module.backend_deploy_artifacts[0].bucket_arn
+  ec2_instance_arn     = module.ec2.instance_arn
   create_oidc_provider = false
 
   allowed_ref_subjects = [
