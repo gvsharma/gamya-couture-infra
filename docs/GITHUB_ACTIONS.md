@@ -32,6 +32,17 @@ Workflow: [`.github/workflows/terraform.yml`](../.github/workflows/terraform.yml
 5. To apply **before merge**: **Actions → Terraform → Run workflow** → select branch → **apply = true** → approve deployment  
 6. Or merge to `main` → dev stack applies automatically on push  
 
+## Stale state lock
+
+If CI fails with `Error acquiring the state lock` and **Who** is your laptop, a local `terraform plan/apply` was interrupted. Release it:
+
+```bash
+cd environments/dev
+terraform force-unlock <LOCK_ID>   # ID from the error message
+```
+
+Then re-run the GitHub Actions workflow.
+
 ## Vercel
 
 After apply:
