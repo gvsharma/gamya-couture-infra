@@ -148,10 +148,10 @@ module "scheduler" {
   source = "../../modules/scheduler"
 
   name_prefix            = local.name_prefix
-  db_instance_identifier = module.rds.db_instance_id
-  db_instance_arn        = module.rds.db_instance_arn
+  db_instance_identifier = substr(replace("${local.name_prefix}-pg", "_", "-"), 0, 63)
   ec2_instance_id        = module.ec2.instance_id
-  ec2_instance_arn       = module.ec2.instance_arn
+  schedule_rds           = true
+  schedule_ec2           = true
 
   timezone                  = var.schedule_timezone
   stop_schedule_expression  = var.schedule_stop_expression

@@ -9,22 +9,22 @@ variable "db_instance_identifier" {
   default     = ""
 }
 
-variable "db_instance_arn" {
-  type        = string
-  description = "RDS DB instance ARN (scopes IAM). Required when db_instance_identifier is set."
-  default     = ""
-}
-
 variable "ec2_instance_id" {
   type        = string
-  description = "EC2 instance ID to stop/start. Leave empty to skip EC2."
+  description = "EC2 instance ID to stop/start."
   default     = ""
 }
 
-variable "ec2_instance_arn" {
-  type        = string
-  description = "EC2 instance ARN (scopes IAM). Required when ec2_instance_id is set."
-  default     = ""
+variable "schedule_rds" {
+  type        = bool
+  description = "Include RDS in stop/start schedule and IAM."
+  default     = true
+}
+
+variable "schedule_ec2" {
+  type        = bool
+  description = "Include EC2 in stop/start schedule and IAM."
+  default     = true
 }
 
 variable "timezone" {

@@ -29,7 +29,7 @@ data "aws_iam_policy_document" "lambda_rds" {
     actions = [
       "rds:DescribeDBInstances",
     ]
-    resources = [var.db_instance_arn]
+    resources = [local.rds_instance_arn]
   }
 
   statement {
@@ -39,7 +39,7 @@ data "aws_iam_policy_document" "lambda_rds" {
       "rds:StopDBInstance",
       "rds:StartDBInstance",
     ]
-    resources = [var.db_instance_arn]
+    resources = [local.rds_instance_arn]
   }
 }
 
@@ -52,7 +52,7 @@ data "aws_iam_policy_document" "lambda_ec2" {
     actions = [
       "ec2:DescribeInstances",
     ]
-    resources = [var.ec2_instance_arn]
+    resources = [local.ec2_instance_arn]
   }
 
   statement {
@@ -62,7 +62,7 @@ data "aws_iam_policy_document" "lambda_ec2" {
       "ec2:StopInstances",
       "ec2:StartInstances",
     ]
-    resources = [var.ec2_instance_arn]
+    resources = [local.ec2_instance_arn]
   }
 }
 

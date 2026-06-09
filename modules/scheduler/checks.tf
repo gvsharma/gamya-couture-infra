@@ -1,20 +1,20 @@
 check "scheduler_has_target" {
   assert {
-    condition     = !var.enabled || local.schedule_rds || local.schedule_ec2
-    error_message = "When scheduler is enabled, set db_instance_identifier and/or ec2_instance_id."
+    condition     = !var.enabled || var.schedule_rds || var.schedule_ec2
+    error_message = "When scheduler is enabled, set schedule_rds and/or schedule_ec2 to true."
   }
 }
 
-check "scheduler_rds_arn" {
+check "scheduler_rds_id" {
   assert {
-    condition     = !local.schedule_rds || var.db_instance_arn != ""
-    error_message = "db_instance_arn is required when db_instance_identifier is set."
+    condition     = !var.schedule_rds || var.db_instance_identifier != ""
+    error_message = "db_instance_identifier is required when schedule_rds is true."
   }
 }
 
-check "scheduler_ec2_arn" {
+check "scheduler_ec2_id" {
   assert {
-    condition     = !local.schedule_ec2 || var.ec2_instance_arn != ""
-    error_message = "ec2_instance_arn is required when ec2_instance_id is set."
+    condition     = !var.schedule_ec2 || var.ec2_instance_id != ""
+    error_message = "ec2_instance_id is required when schedule_ec2 is true."
   }
 }
