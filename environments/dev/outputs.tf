@@ -1,3 +1,7 @@
+# ------------------------------------------------------------------------------
+# Environment
+# ------------------------------------------------------------------------------
+
 output "environment" {
   description = "Deployment environment."
   value       = var.environment
@@ -13,24 +17,23 @@ output "name_prefix" {
   value       = local.name_prefix
 }
 
+# ------------------------------------------------------------------------------
+# Networking (module.vpc)
+# ------------------------------------------------------------------------------
+
 output "vpc_id" {
-  description = "Dev VPC ID."
+  description = "VPC ID."
   value       = module.vpc.vpc_id
 }
 
+output "vpc_cidr_block" {
+  description = "VPC CIDR block."
+  value       = module.vpc.vpc_cidr_block
+}
+
 output "public_subnet_id" {
-  description = "Dev public subnet ID."
+  description = "Public subnet ID for EC2."
   value       = module.vpc.public_subnet_id
-}
-
-output "security_group_id" {
-  description = "Dev API security group ID."
-  value       = module.security_groups.security_group_id
-}
-
-output "rds_security_group_id" {
-  description = "RDS PostgreSQL security group ID."
-  value       = module.security_groups.rds_security_group_id
 }
 
 output "private_subnet_ids" {
@@ -38,23 +41,76 @@ output "private_subnet_ids" {
   value       = module.vpc.private_subnet_ids
 }
 
+output "internet_gateway_id" {
+  description = "Internet Gateway ID."
+  value       = module.vpc.internet_gateway_id
+}
+
+output "availability_zones" {
+  description = "AZs used by private RDS subnets."
+  value       = module.vpc.availability_zones
+}
+
+# ------------------------------------------------------------------------------
+# Security groups (module.security_groups)
+# ------------------------------------------------------------------------------
+
+output "ec2_security_group_id" {
+  description = "API EC2 security group ID."
+  value       = module.security_groups.security_group_id
+}
+
+output "ec2_security_group_arn" {
+  description = "API EC2 security group ARN."
+  value       = module.security_groups.security_group_arn
+}
+
+output "rds_security_group_id" {
+  description = "RDS PostgreSQL security group ID."
+  value       = module.security_groups.rds_security_group_id
+}
+
+output "rds_security_group_arn" {
+  description = "RDS PostgreSQL security group ARN."
+  value       = module.security_groups.rds_security_group_arn
+}
+
+# ------------------------------------------------------------------------------
+# EC2 API backend (module.ec2)
+# ------------------------------------------------------------------------------
+
 output "ec2_instance_id" {
-  description = "Dev API EC2 instance ID."
+  description = "API EC2 instance ID (SSM target)."
   value       = module.ec2.instance_id
 }
 
+output "ec2_instance_arn" {
+  description = "API EC2 instance ARN."
+  value       = module.ec2.instance_arn
+}
+
+output "ec2_instance_type" {
+  description = "Provisioned EC2 instance type."
+  value       = var.ec2_instance_type
+}
+
+output "ec2_private_ip" {
+  description = "EC2 private IP."
+  value       = module.ec2.private_ip
+}
+
 output "api_public_ip" {
-  description = "Dev API Elastic IP — use in Vercel env vars."
+  description = "Elastic IP for Vercel / DNS A record."
   value       = module.ec2.public_ip
 }
 
 output "api_url" {
-  description = "Dev API base URL (HTTP)."
+  description = "API base URL (HTTP)."
   value       = module.ec2.api_url
 }
 
 output "health_url" {
-  description = "Dev health check URL."
+  description = "Health check URL."
   value       = module.ec2.health_url
 }
 
@@ -64,8 +120,23 @@ output "vercel_env_hint" {
 }
 
 # ------------------------------------------------------------------------------
-# RDS
+# RDS PostgreSQL (module.rds)
 # ------------------------------------------------------------------------------
+
+output "db_instance_id" {
+  description = "RDS instance identifier."
+  value       = module.rds.db_instance_id
+}
+
+output "db_instance_arn" {
+  description = "RDS instance ARN."
+  value       = module.rds.db_instance_arn
+}
+
+output "db_subnet_group_name" {
+  description = "RDS DB subnet group name."
+  value       = module.rds.db_subnet_group_name
+}
 
 output "db_endpoint" {
   description = "RDS hostname (private; reachable from API EC2 only)."
@@ -80,6 +151,11 @@ output "db_port" {
 output "db_name" {
   description = "PostgreSQL database name."
   value       = module.rds.db_name
+}
+
+output "db_username" {
+  description = "RDS master username (also in SSM)."
+  value       = module.rds.db_username
 }
 
 output "jdbc_url" {
@@ -107,8 +183,13 @@ output "ssm_db_password_parameter_arn" {
   value       = module.rds.ssm_parameter_password_arn
 }
 
+output "db_secrets_read_policy_arn" {
+  description = "IAM policy ARN attached to EC2 for reading DB credentials."
+  value       = module.rds.db_secrets_read_policy_arn
+}
+
 # ------------------------------------------------------------------------------
-# Cost scheduler
+# Cost scheduler (module.scheduler)
 # ------------------------------------------------------------------------------
 
 output "cost_schedule_enabled" {
@@ -134,4 +215,96 @@ output "cost_schedule_start_local" {
 output "cost_scheduler_lambda_name" {
   description = "Cost scheduler Lambda function name."
   value       = try(module.scheduler[0].lambda_function_name, null)
+}
+
+output "cost_scheduler_lambda_arn" {
+  description = "Cost scheduler Lambda ARN."
+  value       = try(module.scheduler[0].lambda_function_arn, null)
+}
+
+output "cost_schedule_stop_arn" {
+  description = "EventBridge stop schedule ARN."
+  value       = try(module.scheduler[0].stop_schedule_arn, null)
+}
+
+output "cost_schedule_start_arn" {
+  description = "EventBridge start schedule ARN."
+  value       = try(module.scheduler[0].start_schedule_arn, null)
+}
+
+# ------------------------------------------------------------------------------
+# Consolidated summary — mirrors terraform plan modules/resources
+# ------------------------------------------------------------------------------
+
+output "provisioned_resources" {
+  description = "All provisioned resources grouped by module (post-apply summary)."
+  value = {
+    environment = {
+      name   = var.environment
+      region = var.aws_region
+      prefix = local.name_prefix
+    }
+
+    networking = {
+      vpc_id               = module.vpc.vpc_id
+      vpc_cidr             = module.vpc.vpc_cidr_block
+      public_subnet_id     = module.vpc.public_subnet_id
+      private_subnet_ids   = module.vpc.private_subnet_ids
+      internet_gateway_id  = module.vpc.internet_gateway_id
+      availability_zones   = module.vpc.availability_zones
+    }
+
+    security_groups = {
+      ec2_sg_id  = module.security_groups.security_group_id
+      ec2_sg_arn = module.security_groups.security_group_arn
+      rds_sg_id  = module.security_groups.rds_security_group_id
+      rds_sg_arn = module.security_groups.rds_security_group_arn
+    }
+
+    ec2 = {
+      instance_id   = module.ec2.instance_id
+      instance_arn  = module.ec2.instance_arn
+      instance_type = var.ec2_instance_type
+      private_ip    = module.ec2.private_ip
+      public_ip     = module.ec2.public_ip
+      api_url       = module.ec2.api_url
+      health_url    = module.ec2.health_url
+    }
+
+    rds = {
+      instance_id        = module.rds.db_instance_id
+      instance_arn       = module.rds.db_instance_arn
+      subnet_group_name  = module.rds.db_subnet_group_name
+      endpoint           = module.rds.db_endpoint
+      port               = module.rds.db_port
+      database_name      = module.rds.db_name
+      username           = module.rds.db_username
+      jdbc_url           = module.rds.jdbc_url
+      ssm_username_path  = module.rds.ssm_parameter_username_name
+      ssm_password_path  = module.rds.ssm_parameter_password_name
+      secrets_policy_arn = module.rds.db_secrets_read_policy_arn
+    }
+
+    scheduler = var.enable_cost_schedule ? {
+      enabled        = true
+      timezone       = module.scheduler[0].timezone
+      stop_at        = module.scheduler[0].stop_schedule_local_time
+      start_at       = module.scheduler[0].start_schedule_local_time
+      lambda_name    = module.scheduler[0].lambda_function_name
+      lambda_arn     = module.scheduler[0].lambda_function_arn
+      stop_schedule  = module.scheduler[0].stop_schedule_arn
+      start_schedule = module.scheduler[0].start_schedule_arn
+      schedules_ec2  = module.scheduler[0].schedule_ec2
+      schedules_rds  = module.scheduler[0].schedule_rds
+    } : {
+      enabled = false
+    }
+
+    spring_boot = {
+      datasource_url      = module.rds.jdbc_url
+      ssm_username_path   = module.rds.ssm_parameter_username_name
+      ssm_password_path   = module.rds.ssm_parameter_password_name
+      example_application = "modules/rds/examples/application-prod.yml"
+    }
+  }
 }
