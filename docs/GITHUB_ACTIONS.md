@@ -32,6 +32,10 @@ Workflow: [`.github/workflows/terraform.yml`](../.github/workflows/terraform.yml
 5. To apply **before merge**: **Actions → Terraform → Run workflow** → select branch → **apply = true** → approve deployment  
 6. Or merge to `main` → dev stack applies automatically on push  
 
+## Partial apply / re-run
+
+If apply fails mid-way (e.g. Lambda zip missing), fix the workflow and **re-run** the workflow. Terraform will create only the remaining resources; already-created resources (e.g. RDS) are in state.
+
 ## Stale state lock
 
 If CI fails with `Error acquiring the state lock` and **Who** is your laptop, a local `terraform plan/apply` was interrupted. Release it:

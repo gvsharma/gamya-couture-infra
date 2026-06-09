@@ -145,6 +145,7 @@ jobs:
           path: |
             ${{ env.WORKING_DIR }}/tfplan
             ${{ env.WORKING_DIR }}/plan.txt
+            modules/scheduler/.build/scheduler.zip
           retention-days: 14
 
   apply:
@@ -186,7 +187,15 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: tfplan-dev-${{ github.run_id }}
-          path: ${{ env.WORKING_DIR }}
+          path: ${{ github.workspace }}
+
+      - name: Prepare Lambda deployment package
+        working-directory: ${{ github.workspace }}
+        run: |
+          mkdir -p modules/scheduler/.build
+          if [ ! -f modules/scheduler/.build/scheduler.zip ]; then
+            zip -j modules/scheduler/.build/scheduler.zip modules/scheduler/lambda/handler.py
+          fi
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
