@@ -15,7 +15,8 @@ resource "aws_ssm_parameter" "db_username" {
   value       = var.db_username
 
   tags = {
-    Name = "${var.name_prefix}-db-username"
+    Name            = "${var.name_prefix}-db-username"
+    ResourcePurpose = "secrets-db-username-ssm"
   }
 }
 
@@ -26,7 +27,8 @@ resource "aws_ssm_parameter" "db_password" {
   value       = random_password.master.result
 
   tags = {
-    Name = "${var.name_prefix}-db-password"
+    Name            = "${var.name_prefix}-db-password"
+    ResourcePurpose = "secrets-db-password-ssm"
   }
 
   lifecycle {
@@ -73,4 +75,9 @@ resource "aws_iam_policy" "read_db_secrets" {
   name_prefix = "${var.name_prefix}-rds-secrets-"
   description = "Read RDS credentials from SSM Parameter Store (${var.name_prefix})."
   policy      = data.aws_iam_policy_document.read_db_secrets[0].json
+
+  tags = {
+    Name            = "${var.name_prefix}-rds-secrets-read"
+    ResourcePurpose = "iam-rds-secrets-read"
+  }
 }

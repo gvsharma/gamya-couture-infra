@@ -25,9 +25,9 @@ resource "aws_instance" "api" {
   }
 
   tags = {
-    Name    = "${var.name_prefix}-api"
-    Role    = "vercel-backend"
-    Purpose = "api"
+    Name            = "${var.name_prefix}-api"
+    Role            = "vercel-backend"
+    ResourcePurpose = "compute-api-backend-ec2"
   }
 
   lifecycle {
@@ -39,7 +39,8 @@ resource "aws_eip" "api" {
   domain = "vpc"
 
   tags = {
-    Name = "${var.name_prefix}-api-eip"
+    Name            = "${var.name_prefix}-api-eip"
+    ResourcePurpose = "network-elastic-ip-api"
   }
 }
 

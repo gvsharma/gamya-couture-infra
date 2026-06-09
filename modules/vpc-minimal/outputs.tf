@@ -22,3 +22,13 @@ output "availability_zone" {
   description = "AZ used by the public subnet."
   value       = local.az
 }
+
+output "private_subnet_ids" {
+  description = "Private subnet IDs for RDS (two AZs)."
+  value       = aws_subnet.private[*].id
+}
+
+output "availability_zones" {
+  description = "AZs used by private subnets."
+  value       = local.azs
+}

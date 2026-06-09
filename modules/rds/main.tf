@@ -4,7 +4,8 @@ resource "aws_db_subnet_group" "this" {
   description = "Private subnets for ${var.name_prefix} PostgreSQL."
 
   tags = {
-    Name = "${var.name_prefix}-db-subnet-group"
+    Name            = "${var.name_prefix}-db-subnet-group"
+    ResourcePurpose = "database-subnet-group"
   }
 
   lifecycle {
@@ -44,10 +45,11 @@ resource "aws_db_instance" "this" {
   performance_insights_enabled = false
   monitoring_interval          = 0
 
-  enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
+  enabled_cloudwatch_logs_exports = var.enable_cloudwatch_logs_exports ? ["postgresql", "upgrade"] : []
 
   tags = {
-    Name = "${var.name_prefix}-postgres"
+    Name            = "${var.name_prefix}-postgres"
+    ResourcePurpose = "database-postgresql-rds"
   }
 
   depends_on = [

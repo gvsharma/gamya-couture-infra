@@ -6,8 +6,8 @@ Reusable modules for **gamya-couture-infra**. Naming prefix: `gamya-couture-{env
 
 | Module | Purpose | Status |
 |--------|---------|--------|
-| [vpc-minimal](./vpc-minimal/) | VPC, 1 public subnet, IGW | **Active** |
-| [security-groups-api](./security-groups-api/) | API EC2 SG (HTTP/HTTPS + SSH) | **Active** |
+| [vpc-minimal](./vpc-minimal/) | VPC, 1 public + 2 private subnets, IGW | **Active** |
+| [security-groups-api](./security-groups-api/) | API EC2 + RDS SG (HTTP/HTTPS + SSH) | **Active** |
 | [ec2-api](./ec2-api/) | AL2023 `t3.micro`, nginx | **Active** |
 
 Environment: [`environments/dev`](../environments/dev/) (dev only)
@@ -25,7 +25,7 @@ Environment: [`environments/dev`](../environments/dev/) (dev only)
 | Module | Purpose | Status |
 |--------|---------|--------|
 | [rds](./rds/) | PostgreSQL 16 | **Active** |
-| [scheduler](./scheduler/) | RDS stop/start (IST) | **Active** |
+| [scheduler](./scheduler/) | EC2 + RDS stop/start (00:00–09:00 IST) | **Active** |
 | [s3](./s3/) | Frontend + media buckets | **Active** |
 
 ## Edge & DNS (active)

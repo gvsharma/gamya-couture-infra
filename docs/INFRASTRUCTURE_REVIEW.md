@@ -54,7 +54,7 @@ flowchart TB
   subgraph Ops["Operations"]
     SSM[SSM Session Manager]
     SSMParam[SSM Parameter Store<br/>DB credentials]
-    Sched[EventBridge Scheduler<br/>00:00–07:00 IST stop/start]
+    Sched[EventBridge Scheduler<br/>00:00–09:00 IST EC2+RDS]
     Lambda[Lambda RDS scheduler]
     CW[CloudWatch Logs 4d]
   end

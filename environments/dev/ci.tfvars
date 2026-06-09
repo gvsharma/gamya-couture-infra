@@ -4,6 +4,7 @@
 aws_region  = "ap-south-1"
 environment = "dev"
 project     = "gamya-couture"
+owner       = "Venkat"
 
 vpc_cidr = "10.50.0.0/16"
 
@@ -12,3 +13,9 @@ admin_cidr = "127.0.0.1/32"
 
 ec2_instance_type = "t3.micro"
 api_port          = 8080
+
+# Cost scheduler: stop 00:00 IST, start 09:00 IST (EC2 + RDS)
+enable_cost_schedule      = true
+schedule_timezone         = "Asia/Kolkata"
+schedule_stop_expression  = "cron(0 0 * * ? *)"
+schedule_start_expression = "cron(0 9 * * ? *)"

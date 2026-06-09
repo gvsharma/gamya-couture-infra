@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 3.6"
+    }
   }
 }
 
@@ -20,8 +24,9 @@ provider "aws" {
 module "tags" {
   source = "../../global"
 
-  environment = var.environment
-  project     = var.project
-  owner       = var.owner
-  cost_center = var.cost_center
+  environment       = var.environment
+  project           = var.project
+  owner             = var.owner
+  cost_optimization = var.cost_optimization
+  auto_shutdown     = var.enable_cost_schedule ? "true" : "false"
 }

@@ -42,3 +42,9 @@ variable "root_volume_size_gb" {
   description = "Root gp3 volume size in GB."
   default     = 8
 }
+
+variable "additional_iam_policy_arns" {
+  type        = list(string)
+  description = "Extra IAM policy ARNs to attach to the API instance role (e.g. RDS SSM read)."
+  default     = []
+}
