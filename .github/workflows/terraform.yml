@@ -1,8 +1,9 @@
 # ------------------------------------------------------------------------------
 # Terraform CI/CD — gamya-couture-infra (DEV ONLY)
 #
-# Pull request → main : fmt, init, validate, plan (no apply)
-# Push → main        : fmt, init, validate, plan, then apply -auto-approve
+# Pull request → main     : fmt, init, validate, plan (no apply)
+# Push → main             : fmt, init, validate, plan, then apply -auto-approve
+# Manual (workflow_dispatch): plan; optional apply with development environment approval
 #
 # Authentication: GitHub OIDC → AWS IAM role (secret: AWS_ROLE_ARN)
 # Region: ap-south-1
@@ -28,7 +29,7 @@ on:
   workflow_dispatch:
     inputs:
       apply:
-        description: Run terraform apply after plan (main branch only)
+        description: Run terraform apply after plan (requires development environment approval)
         type: boolean
         required: true
         default: false
@@ -56,7 +57,6 @@ jobs:
   plan:
     name: Plan (dev)
     runs-on: ubuntu-latest
-    environment: development
     permissions:
       id-token: write
       contents: read
@@ -120,6 +120,20 @@ jobs:
               echo '```hcl'
               head -c 60000 plan.txt
               echo '```'
+              echo ""
+              echo "### Apply"
+              if [ "${{ github.event_name }}" = "pull_request" ]; then
+                echo "Apply is **skipped** on pull requests. To deploy:"
+                echo "1. **Actions → Terraform → Run workflow**"
+                echo "2. Select this branch, set **apply = true**, run"
+                echo "3. Approve the **development** environment when prompted"
+                echo ""
+                echo "Or merge to \`main\` for automatic apply on push."
+              elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.apply }}" != "true" ]; then
+                echo "Re-run workflow with **apply = true** to deploy (requires environment approval)."
+              elif [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" != "refs/heads/main" ]; then
+                echo "Apply runs only on push to \`main\` or manual dispatch with apply enabled."
+              fi
             } >> "$GITHUB_STEP_SUMMARY"
           fi
 
@@ -137,8 +151,10 @@ jobs:
     name: Apply (dev)
     needs: plan
     if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_dispatch' && inputs.apply == true && github.ref == 'refs/heads/main')
+      needs.plan.result == 'success' && (
+        (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+        (github.event_name == 'workflow_dispatch' && inputs.apply == true)
+      )
     runs-on: ubuntu-latest
     environment: development
     permissions:

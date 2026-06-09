@@ -18,17 +18,19 @@ Workflow: [`.github/workflows/terraform.yml`](../.github/workflows/terraform.yml
 
 | Event | Action |
 |-------|--------|
-| PR → `main` | Plan dev only |
-| Push → `main` | Plan + apply dev |
+| PR → `main` | Plan only (apply skipped) |
+| Push → `main` | Plan + auto-apply dev |
 | Manual + `apply=false` | Plan only |
+| Manual + `apply=true` (any branch) | Plan + apply dev (requires **development** environment approval) |
 
 ## Setup checklist
 
 1. Apply `github-oidc/` → get role ARN  
 2. (Optional) **Variables → `AWS_ROLE_ARN`** or secret **`AWS_ROLE_ARN`** — workflow has a safe default ARN  
-3. **Environments → `development`** — create if missing; optional required reviewers for apply  
+3. **Environments → `development`** — add **Required reviewers** so apply pauses for your approval  
 4. Open PR from feature branch → verify **Terraform / Plan (dev)**  
-5. Merge to `main` → dev stack applies  
+5. To apply **before merge**: **Actions → Terraform → Run workflow** → select branch → **apply = true** → approve deployment  
+6. Or merge to `main` → dev stack applies automatically on push  
 
 ## Vercel
 
