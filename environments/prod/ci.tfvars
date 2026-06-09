@@ -1,0 +1,23 @@
+# Non-sensitive defaults for GitHub Actions (terraform plan/apply).
+# Override via GitHub repository variables: Settings → Secrets and variables → Actions → Variables
+#   TF_VAR_domain_name = gamyacouture.com
+
+aws_region  = "ap-south-1"
+environment = "prod"
+project     = "gamya-couture"
+
+enable_ssh   = false
+admin_cidr   = "127.0.0.1/32"
+
+restrict_web_ingress_to_cloudfront = true
+
+domain_name     = ""
+api_subdomain   = "api"
+www_subdomain   = "www"
+admin_subdomain = "admin"
+
+db_name             = "gamya"
+db_username         = "gamya_admin"
+enable_rds_schedule = true
+
+ec2_instance_type = "t4g.small"

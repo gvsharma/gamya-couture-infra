@@ -4,8 +4,8 @@ One-time infrastructure to host Terraform state for **Gamya Couture** in **ap-so
 
 | Resource | Name | Purpose |
 |----------|------|---------|
-| S3 bucket | `gamya-couture-tf-state` | Versioned, encrypted state storage |
-| DynamoDB | `gamya-couture-tf-locks` | State locking (pay-per-request) |
+| S3 bucket | `gamya-couture-terraform-state` | Versioned, encrypted state storage |
+| DynamoDB | `terraform-locks` | State locking (pay-per-request) |
 | IAM policy | `gamya-couture-terraform-state-access` | Least-privilege operator access |
 
 **Cost:** Typically &lt; ₹100/month at low apply frequency (S3 storage + occasional DynamoDB lock writes).
@@ -42,7 +42,7 @@ bootstrap/
 
 - AWS CLI configured with permissions to create S3, DynamoDB, and IAM policies
 - Terraform ≥ 1.8
-- S3 bucket name `gamya-couture-tf-state` must be **globally unique** (change in `terraform.tfvars` if taken)
+- S3 bucket name `gamya-couture-terraform-state` must be **globally unique** (change in `terraform.tfvars` if taken)
 
 ## Deployment commands
 
@@ -96,8 +96,8 @@ Repeat for `dev` with `backend.dev.hcl`.
 ### 4. Verify
 
 ```bash
-aws s3 ls s3://gamya-couture-tf-state/
-aws dynamodb describe-table --table-name gamya-couture-tf-locks --region ap-south-1
+aws s3 ls s3://gamya-couture-terraform-state/
+aws dynamodb describe-table --table-name terraform-locks --region ap-south-1
 ```
 
 ## Backend configuration (environments)
@@ -124,8 +124,8 @@ Or copy values from `terraform output backend_config_prod` after bootstrap.
 
 | Environment | State key |
 |-------------|-----------|
-| prod | `prod/terraform.tfstate` |
-| dev | `dev/terraform.tfstate` |
+| prod | `infra/terraform.tfstate` |
+| dev | `infra/dev/terraform.tfstate` |
 
 Single bucket, isolated keys — no cross-environment state bleed.
 
@@ -145,6 +145,16 @@ Single bucket, isolated keys — no cross-environment state bleed.
 | Bucket name already exists | Set `state_bucket_name` to a unique name in `terraform.tfvars` |
 | AccessDenied on init | Attach `terraform_state_iam_policy_arn` to your IAM principal |
 | Error acquiring state lock | Check DynamoDB table exists; clear stale lock row only if sure no apply is running |
+
+## GitHub Actions (optional)
+
+Set `enable_github_actions = true` and `github_repository` in `terraform.tfvars`, then re-apply bootstrap to create an OIDC IAM role for CI.
+
+```bash
+terraform output -raw github_terraform_role_arn
+```
+
+Add that ARN as GitHub repository secret `AWS_ROLE_ARN`. See [docs/GITHUB_ACTIONS.md](../docs/GITHUB_ACTIONS.md).
 
 ## What this does not create
 

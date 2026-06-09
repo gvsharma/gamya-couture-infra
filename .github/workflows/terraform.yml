@@ -1,0 +1,176 @@
+# ------------------------------------------------------------------------------
+# Terraform CI/CD — gamya-couture-infra (DEV ONLY)
+#
+# Pull request → main : fmt, init, validate, plan (no apply)
+# Push → main        : fmt, init, validate, plan, then apply -auto-approve
+#
+# Authentication: GitHub OIDC → AWS IAM role (secret: AWS_ROLE_ARN)
+# Region: ap-south-1
+# Working directory: environments/dev
+# Account: 085863558134
+# ------------------------------------------------------------------------------
+
+name: Terraform
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "**.tf"
+      - "**.tfvars"
+      - ".github/workflows/terraform.yml"
+  push:
+    branches: [main]
+    paths:
+      - "**.tf"
+      - "**.tfvars"
+      - ".github/workflows/terraform.yml"
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: Run terraform apply after plan (main branch only)
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  TF_VERSION: "1.9.8"
+  AWS_REGION: ap-south-1
+  TF_IN_AUTOMATION: true
+  TF_INPUT: false
+  TF_PLUGIN_CACHE_DIR: ${{ github.workspace }}/.terraform-plugin-cache
+  WORKING_DIR: environments/dev
+
+concurrency:
+  group: terraform-dev-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    name: Plan (dev)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cache Terraform plugins
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.TF_PLUGIN_CACHE_DIR }}
+            ${{ env.WORKING_DIR }}/.terraform
+          key: terraform-${{ runner.os }}-${{ env.TF_VERSION }}-${{ hashFiles('**/.terraform.lock.hcl', '**/providers.tf') }}
+          restore-keys: |
+            terraform-${{ runner.os }}-${{ env.TF_VERSION }}-
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: github-actions-terraform-dev-plan-${{ github.run_id }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: Terraform fmt (check)
+        run: terraform fmt -check -recursive
+        working-directory: .
+
+      - name: Terraform init
+        run: terraform init -input=false
+
+      - name: Terraform validate
+        run: terraform validate
+
+      - name: Terraform plan
+        run: |
+          set -o pipefail
+          terraform plan -no-color -var-file=ci.tfvars -out=tfplan | tee plan.txt
+
+      - name: Publish plan to job summary
+        if: always()
+        run: |
+          if [ -f plan.txt ]; then
+            {
+              echo "### Terraform plan — dev (gamya-couture-dev)"
+              echo ""
+              echo '```hcl'
+              head -c 60000 plan.txt
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload plan artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-dev-${{ github.run_id }}
+          path: |
+            ${{ env.WORKING_DIR }}/tfplan
+            ${{ env.WORKING_DIR }}/plan.txt
+          retention-days: 14
+
+  apply:
+    name: Apply (dev)
+    needs: plan
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && inputs.apply == true && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    environment: development
+
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cache Terraform plugins
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.TF_PLUGIN_CACHE_DIR }}
+            ${{ env.WORKING_DIR }}/.terraform
+          key: terraform-${{ runner.os }}-${{ env.TF_VERSION }}-${{ hashFiles('**/.terraform.lock.hcl', '**/providers.tf') }}
+          restore-keys: |
+            terraform-${{ runner.os }}-${{ env.TF_VERSION }}-
+
+      - name: Download plan artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-dev-${{ github.run_id }}
+          path: ${{ env.WORKING_DIR }}
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: github-actions-terraform-dev-apply-${{ github.run_id }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: Terraform init
+        run: terraform init -input=false
+
+      - name: Terraform apply
+        run: terraform apply -no-color -auto-approve tfplan

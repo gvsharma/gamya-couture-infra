@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.8.0"
+  required_version = ">= 1.9.0"
 
   required_providers {
     aws = {
@@ -11,15 +11,6 @@ terraform {
 
 provider "aws" {
   region = var.aws_region
-
-  default_tags {
-    tags = module.tags.common_tags
-  }
-}
-
-provider "aws" {
-  alias  = "us_east_1"
-  region = "us-east-1"
 
   default_tags {
     tags = module.tags.common_tags

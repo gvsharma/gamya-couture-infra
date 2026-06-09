@@ -1,7 +1,15 @@
 aws_region        = "ap-south-1"
 project           = "gamya-couture"
-state_bucket_name = "gamya-couture-tf-state"
-lock_table_name   = "gamya-couture-tf-locks"
+state_bucket_name = "gamya-couture-terraform-state"
+lock_table_name   = "terraform-locks"
 
 # Set false if you manage IAM policies outside Terraform.
 enable_iam_policy = true
+
+# GitHub Actions Terraform CI (OIDC — no long-lived AWS keys in GitHub)
+aws_account_id                    = "085863558134"
+enable_github_actions             = true
+github_repository                 = "gvsharma/gamya-couture-infra"
+github_terraform_role_name        = "GitHubTerraformRole"
+create_github_oidc_provider       = true
+github_attach_administrator_access = true

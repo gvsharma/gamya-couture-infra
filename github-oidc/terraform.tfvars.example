@@ -1,0 +1,11 @@
+aws_region    = "ap-south-1"
+aws_account_id = "085863558134"
+
+github_repository = "gvsharma/gamya-couture-infra"
+role_name         = "GitHubTerraformRole"
+
+# Set false if GitHub OIDC provider already exists in this account
+create_oidc_provider = true
+
+# Temporary — replace with scoped IAM policy before long-term production use
+attach_administrator_access = true

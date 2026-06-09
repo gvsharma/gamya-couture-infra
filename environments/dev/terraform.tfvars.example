@@ -1,13 +1,16 @@
+# Dev only — minimal API backend for Vercel (ap-south-1)
+# Copy to terraform.tfvars (gitignored)
+
 aws_region  = "ap-south-1"
 environment = "dev"
 project     = "gamya-couture"
 
+vpc_cidr = "10.50.0.0/16"
+
+# Your public IP (/32) — https://ifconfig.me
 admin_cidr = "203.0.113.10/32"
+enable_ssh = true
 
-# Optional: use a subdomain for dev
-domain_name   = "gamyacouture.com"
-api_subdomain = "api-dev"
-www_subdomain = "dev"
-
-enable_rds_schedule = false
-ec2_instance_type   = "t4g.micro"
+ec2_instance_type = "t3.micro"
+api_port          = 8080
+# ec2_key_name    = "my-keypair"

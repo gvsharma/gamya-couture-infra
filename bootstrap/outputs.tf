@@ -27,7 +27,7 @@ output "backend_config_prod" {
   description = "Copy into environments/prod/backend.hcl after bootstrap."
   value = {
     bucket         = aws_s3_bucket.terraform_state.id
-    key            = "prod/terraform.tfstate"
+    key            = "infra/terraform.tfstate"
     region         = var.aws_region
     encrypt        = true
     dynamodb_table = aws_dynamodb_table.terraform_locks.name
@@ -38,9 +38,19 @@ output "backend_config_dev" {
   description = "Copy into environments/dev/backend.hcl after bootstrap."
   value = {
     bucket         = aws_s3_bucket.terraform_state.id
-    key            = "dev/terraform.tfstate"
+    key            = "infra/dev/terraform.tfstate"
     region         = var.aws_region
     encrypt        = true
     dynamodb_table = aws_dynamodb_table.terraform_locks.name
   }
+}
+
+output "github_terraform_role_arn" {
+  description = "IAM role ARN — set as GitHub repository secret AWS_ROLE_ARN."
+  value       = try(module.github_terraform[0].role_arn, null)
+}
+
+output "github_terraform_role_name" {
+  description = "IAM role name for GitHub Actions."
+  value       = try(module.github_terraform[0].role_name, null)
 }

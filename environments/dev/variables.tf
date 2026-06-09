@@ -1,16 +1,19 @@
 variable "aws_region" {
-  type    = string
-  default = "ap-south-1"
-}
-
-variable "environment" {
-  type    = string
-  default = "dev"
+  type        = string
+  description = "AWS region."
+  default     = "ap-south-1"
 }
 
 variable "project" {
-  type    = string
-  default = "gamya-couture"
+  type        = string
+  description = "Project slug for naming (prefix: gamya-couture-dev)."
+  default     = "gamya-couture"
+}
+
+variable "environment" {
+  type        = string
+  description = "Environment name — must be dev for this stack."
+  default     = "dev"
 }
 
 variable "owner" {
@@ -24,47 +27,37 @@ variable "cost_center" {
 }
 
 variable "vpc_cidr" {
-  type    = string
-  default = "10.1.0.0/16"
+  type        = string
+  description = "Dev VPC CIDR (isolated from prod)."
+  default     = "10.50.0.0/16"
 }
 
 variable "admin_cidr" {
   type        = string
-  description = "SSH allowlist CIDR."
+  description = "Your public IP for SSH (/32)."
+  default     = "127.0.0.1/32"
 }
 
-variable "domain_name" {
-  type    = string
-  default = ""
-}
-
-variable "api_subdomain" {
-  type    = string
-  default = "api-dev"
-}
-
-variable "www_subdomain" {
-  type    = string
-  default = "dev"
-}
-
-variable "db_name" {
-  type    = string
-  default = "gamya_dev"
-}
-
-variable "db_username" {
-  type    = string
-  default = "gamya_admin"
-}
-
-variable "enable_rds_schedule" {
+variable "enable_ssh" {
   type        = bool
-  description = "Dev can disable schedule or share smaller window."
-  default     = false
+  description = "Allow SSH from admin_cidr only."
+  default     = true
 }
 
 variable "ec2_instance_type" {
-  type    = string
-  default = "t4g.micro"
+  type        = string
+  description = "Dev API instance type."
+  default     = "t3.micro"
+}
+
+variable "ec2_key_name" {
+  type        = string
+  description = "Optional EC2 key pair for SSH."
+  default     = null
+}
+
+variable "api_port" {
+  type        = number
+  description = "Backend app port behind nginx."
+  default     = 8080
 }
