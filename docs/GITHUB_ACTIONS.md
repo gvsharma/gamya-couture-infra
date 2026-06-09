@@ -9,8 +9,8 @@ Workflow: [`.github/workflows/terraform.yml`](../.github/workflows/terraform.yml
 | AWS account | `085863558134` |
 | Region | `ap-south-1` |
 | State key | `infra/dev/terraform.tfstate` |
-| Secret | `AWS_ROLE_ARN` |
-| GitHub Environment | `development` |
+| Role ARN | `vars.AWS_ROLE_ARN` or secret `AWS_ROLE_ARN` (workflow falls back to `GitHubTerraformRole`) |
+| GitHub Environment | `development` (both plan and apply) |
 
 **Prod (`environments/prod`) is not deployed by CI** until you change the workflow.
 
@@ -25,8 +25,8 @@ Workflow: [`.github/workflows/terraform.yml`](../.github/workflows/terraform.yml
 ## Setup checklist
 
 1. Apply `github-oidc/` → get role ARN  
-2. GitHub secret **`AWS_ROLE_ARN`**  
-3. (Optional) **Environments → `development`** — required reviewers  
+2. (Optional) **Variables → `AWS_ROLE_ARN`** or secret **`AWS_ROLE_ARN`** — workflow has a safe default ARN  
+3. **Environments → `development`** — create if missing; optional required reviewers for apply  
 4. Open PR from feature branch → verify **Terraform / Plan (dev)**  
 5. Merge to `main` → dev stack applies  
 

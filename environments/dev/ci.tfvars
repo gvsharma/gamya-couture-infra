@@ -7,8 +7,8 @@ project     = "gamya-couture"
 
 vpc_cidr = "10.50.0.0/16"
 
-enable_ssh   = true
-admin_cidr   = "127.0.0.1/32"
+enable_ssh = true
+admin_cidr = "127.0.0.1/32"
 
 ec2_instance_type = "t3.micro"
 api_port          = 8080

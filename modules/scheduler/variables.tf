@@ -38,13 +38,13 @@ variable "log_retention_days" {
 }
 
 variable "lambda_timeout_seconds" {
-  type        = number
-  default     = 60
+  type    = number
+  default = 60
 }
 
 variable "lambda_memory_mb" {
-  type        = number
-  default     = 128
+  type    = number
+  default = 128
 }
 
 variable "enabled" {
