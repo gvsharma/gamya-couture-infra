@@ -6,8 +6,8 @@ aws_region  = "ap-south-1"
 environment = "prod"
 project     = "gamya-couture"
 
-enable_ssh   = false
-admin_cidr   = "127.0.0.1/32"
+enable_ssh = false
+admin_cidr = "127.0.0.1/32"
 
 restrict_web_ingress_to_cloudfront = true
 

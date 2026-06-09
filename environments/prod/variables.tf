@@ -21,13 +21,13 @@ variable "project" {
 }
 
 variable "owner" {
-  type        = string
-  default     = "platform"
+  type    = string
+  default = "platform"
 }
 
 variable "cost_center" {
-  type        = string
-  default     = "mvp"
+  type    = string
+  default = "mvp"
 }
 
 # ------------------------------------------------------------------------------
@@ -101,13 +101,13 @@ variable "admin_subdomain" {
 # ------------------------------------------------------------------------------
 
 variable "db_name" {
-  type        = string
-  default     = "gamya"
+  type    = string
+  default = "gamya"
 }
 
 variable "db_username" {
-  type        = string
-  default     = "gamya_admin"
+  type    = string
+  default = "gamya_admin"
 }
 
 variable "enable_rds_schedule" {

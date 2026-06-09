@@ -49,8 +49,8 @@ variable "allocated_storage_gb" {
 }
 
 variable "storage_type" {
-  type        = string
-  default     = "gp3"
+  type    = string
+  default = "gp3"
 }
 
 variable "log_retention_days" {

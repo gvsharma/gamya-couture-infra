@@ -30,15 +30,15 @@ resource "aws_db_instance" "this" {
   db_subnet_group_name   = aws_db_subnet_group.this.name
   vpc_security_group_ids = var.vpc_security_group_ids
 
-  publicly_accessible     = false
-  multi_az                = false
-  deletion_protection     = false
-  backup_retention_period = 0
-  skip_final_snapshot     = true
-  copy_tags_to_snapshot   = false
-  delete_automated_backups  = true
-  auto_minor_version_upgrade   = true
-  apply_immediately            = true
+  publicly_accessible        = false
+  multi_az                   = false
+  deletion_protection        = false
+  backup_retention_period    = 0
+  skip_final_snapshot        = true
+  copy_tags_to_snapshot      = false
+  delete_automated_backups   = true
+  auto_minor_version_upgrade = true
+  apply_immediately          = true
 
   # Cost: disable paid observability features
   performance_insights_enabled = false

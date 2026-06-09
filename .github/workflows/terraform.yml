@@ -79,6 +79,9 @@ jobs:
           restore-keys: |
             terraform-${{ runner.os }}-${{ env.TF_VERSION }}-
 
+      - name: Prepare Terraform plugin cache dir
+        run: mkdir -p "$TF_PLUGIN_CACHE_DIR"
+
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -159,6 +162,9 @@ jobs:
           key: terraform-${{ runner.os }}-${{ env.TF_VERSION }}-${{ hashFiles('**/.terraform.lock.hcl', '**/providers.tf') }}
           restore-keys: |
             terraform-${{ runner.os }}-${{ env.TF_VERSION }}-
+
+      - name: Prepare Terraform plugin cache dir
+        run: mkdir -p "$TF_PLUGIN_CACHE_DIR"
 
       - name: Download plan artifact
         uses: actions/download-artifact@v4

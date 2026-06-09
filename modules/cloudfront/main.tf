@@ -48,8 +48,8 @@ resource "aws_cloudfront_distribution" "this" {
       cached_methods         = ["GET", "HEAD"]
       compress               = true
 
-      cache_policy_id          = local.cache_policy_caching_optimized
-      origin_request_policy_id = local.media_origin_request_policy_id
+      cache_policy_id            = local.cache_policy_caching_optimized
+      origin_request_policy_id   = local.media_origin_request_policy_id
       response_headers_policy_id = local.response_headers_policy_cors
     }
   }

@@ -1,6 +1,6 @@
 resource "aws_iam_role" "ec2" {
-  name_prefix = "${var.name_prefix}-ec2-"
-  description = "IAM role for Gamya Couture application EC2 (SSM + CloudWatch)."
+  name_prefix        = "${var.name_prefix}-ec2-"
+  description        = "IAM role for Gamya Couture application EC2 (SSM + CloudWatch)."
   assume_role_policy = data.aws_iam_policy_document.ec2_assume_role.json
 
   tags = {
