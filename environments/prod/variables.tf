@@ -21,13 +21,15 @@ variable "project" {
 }
 
 variable "owner" {
-  type    = string
-  default = "platform"
+  type        = string
+  description = "Owner tag for all resources."
+  default     = "Venkat"
 }
 
-variable "cost_center" {
-  type    = string
-  default = "mvp"
+variable "cost_optimization" {
+  type        = string
+  description = "CostOptimization tag value."
+  default     = "enabled"
 }
 
 # ------------------------------------------------------------------------------
@@ -110,10 +112,28 @@ variable "db_username" {
   default = "gamya_admin"
 }
 
-variable "enable_rds_schedule" {
+variable "enable_cost_schedule" {
   type        = bool
-  description = "Stop RDS 00:00–07:00 IST daily."
+  description = "Enable daily EC2+RDS stop (00:00 IST) and start (09:00 IST)."
   default     = true
+}
+
+variable "schedule_timezone" {
+  type        = string
+  description = "IANA timezone for cost scheduler."
+  default     = "Asia/Kolkata"
+}
+
+variable "schedule_stop_expression" {
+  type        = string
+  description = "EventBridge cron for nightly stop."
+  default     = "cron(0 0 * * ? *)"
+}
+
+variable "schedule_start_expression" {
+  type        = string
+  description = "EventBridge cron for morning start."
+  default     = "cron(0 9 * * ? *)"
 }
 
 # ------------------------------------------------------------------------------
@@ -123,7 +143,7 @@ variable "enable_rds_schedule" {
 variable "ec2_instance_type" {
   type        = string
   description = "ARM Graviton instance for Docker / Spring Boot."
-  default     = "t4g.small"
+  default     = "t4g.micro"
 }
 
 variable "ec2_key_name" {

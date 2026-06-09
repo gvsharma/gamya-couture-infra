@@ -1,6 +1,7 @@
 # ------------------------------------------------------------------------------
 # Dev environment — minimal API stack for Vercel frontend (ap-south-1)
-# VPC + public subnet + IGW + EC2 (Amazon Linux 2023, t3.micro)
+# VPC + public subnet + private RDS subnets + EC2 (Amazon Linux 2023, t3.micro)
+# + cheapest PostgreSQL RDS (private, EC2 SG → RDS SG only)
 # ------------------------------------------------------------------------------
 
 module "vpc" {
@@ -19,6 +20,17 @@ module "security_groups" {
   enable_ssh  = var.enable_ssh
 }
 
+module "rds" {
+  source = "../../modules/rds"
+
+  name_prefix            = local.name_prefix
+  private_subnet_ids     = module.vpc.private_subnet_ids
+  vpc_security_group_ids = [module.security_groups.rds_security_group_id]
+  db_name                = var.db_name
+  db_username            = var.db_username
+  parameter_store_prefix = local.db_parameter_store_prefix
+}
+
 module "ec2" {
   source = "../../modules/ec2-api"
 
@@ -28,4 +40,24 @@ module "ec2" {
   instance_type      = var.ec2_instance_type
   key_name           = var.ec2_key_name
   api_port           = var.api_port
+
+  additional_iam_policy_arns = compact([
+    module.rds.db_secrets_read_policy_arn,
+  ])
+}
+
+module "scheduler" {
+  count  = var.enable_cost_schedule ? 1 : 0
+  source = "../../modules/scheduler"
+
+  name_prefix            = local.name_prefix
+  db_instance_identifier = module.rds.db_instance_id
+  db_instance_arn        = module.rds.db_instance_arn
+  ec2_instance_id        = module.ec2.instance_id
+  ec2_instance_arn       = module.ec2.instance_arn
+
+  timezone                  = var.schedule_timezone
+  stop_schedule_expression  = var.schedule_stop_expression
+  start_schedule_expression = var.schedule_start_expression
+  enabled                   = true
 }

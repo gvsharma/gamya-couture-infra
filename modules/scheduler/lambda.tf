@@ -5,17 +5,18 @@ data "archive_file" "lambda" {
 }
 
 resource "aws_cloudwatch_log_group" "lambda" {
-  name              = "/aws/lambda/${var.name_prefix}-rds-scheduler"
+  name              = "/aws/lambda/${var.name_prefix}-cost-scheduler"
   retention_in_days = var.log_retention_days
 
   tags = {
-    Name = "${var.name_prefix}-rds-scheduler-logs"
+    Name            = "${var.name_prefix}-cost-scheduler-logs"
+    ResourcePurpose = "cost-scheduler-logs"
   }
 }
 
-resource "aws_lambda_function" "rds_scheduler" {
-  function_name = "${var.name_prefix}-rds-scheduler"
-  description   = "Stop/start RDS instance on a daily cost-saving schedule."
+resource "aws_lambda_function" "cost_scheduler" {
+  function_name = "${var.name_prefix}-cost-scheduler"
+  description   = "Daily stop/start EC2 and RDS for cost optimization (IST schedule)."
   role          = aws_iam_role.lambda.arn
   handler       = "handler.lambda_handler"
   runtime       = "python3.12"
@@ -27,7 +28,10 @@ resource "aws_lambda_function" "rds_scheduler" {
 
   environment {
     variables = {
-      DB_INSTANCE_IDENTIFIER = var.db_instance_identifier
+      EC2_INSTANCE_ID           = var.ec2_instance_id
+      DB_INSTANCE_IDENTIFIER    = var.db_instance_identifier
+      RDS_WAIT_MAX_SECONDS      = tostring(var.rds_wait_max_seconds)
+      RDS_POLL_INTERVAL_SECONDS = tostring(var.rds_poll_interval_seconds)
     }
   }
 
@@ -37,6 +41,7 @@ resource "aws_lambda_function" "rds_scheduler" {
   ]
 
   tags = {
-    Name = "${var.name_prefix}-rds-scheduler"
+    Name            = "${var.name_prefix}-cost-scheduler"
+    ResourcePurpose = "cost-scheduler-lambda"
   }
 }

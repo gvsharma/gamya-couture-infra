@@ -1,12 +1,12 @@
 # rds
 
-Cheapest production-viable **PostgreSQL 16** on **RDS `db.t4g.micro`** with **20 GB gp3**, private subnets, credentials in **SSM Parameter Store**, and **4-day** log retention.
+Cheapest production-viable **PostgreSQL 17** on **RDS `db.t4g.micro`** with **20 GB gp3** (AWS minimum), private subnets, credentials in **SSM Parameter Store**, and **no** CloudWatch log exports by default.
 
 ## Configuration summary
 
 | Setting | Value |
 |---------|--------|
-| Engine | PostgreSQL **16** |
+| Engine | PostgreSQL **17** (latest stable major) |
 | Instance | **db.t4g.micro** (Graviton) |
 | Storage | **20 GB gp3**, encrypted |
 | Network | Private subnets, **no** public access |
@@ -56,6 +56,8 @@ Attach `db_secrets_read_policy_arn` to the EC2 instance role.
 
 ## Spring Boot example
 
+See [`examples/application-prod.yml`](./examples/application-prod.yml) for a full `application-prod.yml` with Hikari and JPA settings.
+
 ```properties
 spring.datasource.url=jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
 # Load user/password from SSM at startup (AWS SDK) or inject via deploy script:
@@ -73,12 +75,12 @@ Prices are approximate USD; use the [AWS Pricing Calculator](https://calculator.
 | **Backup storage** | 0 (retention 0) | **0** |
 | **Performance Insights** | Disabled | **0** |
 | **Enhanced monitoring** | Disabled | **0** |
-| **CloudWatch Logs** | Low volume, 4-day retention | **~0.50** |
+| **CloudWatch Logs** | Disabled (`enable_cloudwatch_logs_exports = false`) | **0** |
 | **SSM parameters** | Standard parameters | **~0** |
 
 | Scenario | ~USD/mo | ~INR/mo (@83) |
 |----------|---------|----------------|
-| **24/7 running** | **~16** | **~₹1,330** |
+| **24/7 running** | **~15** | **~₹1,250** |
 | **Stop 7 h/day (scheduler)** | **~12** compute + storage | **~₹1,000** |
 
 Storage is billed while the instance exists, even when stopped.

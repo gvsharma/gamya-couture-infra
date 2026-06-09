@@ -20,3 +20,9 @@ variable "availability_zone" {
   description = "AZ for the public subnet. Leave empty to use the first available AZ."
   default     = ""
 }
+
+variable "private_subnet_cidrs" {
+  type        = list(string)
+  description = "CIDR blocks for private RDS subnets (two AZs). Auto-derived from vpc_cidr when empty."
+  default     = []
+}

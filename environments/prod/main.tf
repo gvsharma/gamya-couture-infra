@@ -144,13 +144,19 @@ module "ec2" {
 }
 
 module "scheduler" {
-  count  = var.enable_rds_schedule ? 1 : 0
+  count  = var.enable_cost_schedule ? 1 : 0
   source = "../../modules/scheduler"
 
   name_prefix            = local.name_prefix
   db_instance_identifier = module.rds.db_instance_id
   db_instance_arn        = module.rds.db_instance_arn
-  enabled                = true
+  ec2_instance_id        = module.ec2.instance_id
+  ec2_instance_arn       = module.ec2.instance_arn
+
+  timezone                  = var.schedule_timezone
+  stop_schedule_expression  = var.schedule_stop_expression
+  start_schedule_expression = var.schedule_start_expression
+  enabled                   = true
 }
 
 # ------------------------------------------------------------------------------

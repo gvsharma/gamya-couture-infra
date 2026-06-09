@@ -20,12 +20,17 @@ www_subdomain   = "www"
 admin_subdomain = "admin"
 
 # Database
-db_name             = "gamya"
-db_username         = "gamya_admin"
-enable_rds_schedule = true
+db_name     = "gamya"
+db_username = "gamya_admin"
 
 # Compute
-ec2_instance_type = "t4g.small"
+ec2_instance_type = "t4g.micro"
+
+# Daily cost savings: stop 12:00 AM IST, start 9:00 AM IST (EC2 + RDS)
+enable_cost_schedule      = true
+schedule_timezone         = "Asia/Kolkata"
+schedule_stop_expression  = "cron(0 0 * * ? *)"
+schedule_start_expression = "cron(0 9 * * ? *)"
 # ec2_key_name      = "my-keypair"
 
 # CI/CD (optional)

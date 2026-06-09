@@ -3,6 +3,11 @@ output "instance_id" {
   value       = aws_instance.api.id
 }
 
+output "instance_arn" {
+  description = "EC2 instance ARN (for scheduler IAM scoping)."
+  value       = aws_instance.api.arn
+}
+
 output "private_ip" {
   description = "Private IP."
   value       = aws_instance.api.private_ip

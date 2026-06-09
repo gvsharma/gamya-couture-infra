@@ -17,13 +17,15 @@ variable "environment" {
 }
 
 variable "owner" {
-  type    = string
-  default = "platform"
+  type        = string
+  description = "Owner tag for all resources."
+  default     = "Venkat"
 }
 
-variable "cost_center" {
-  type    = string
-  default = "mvp"
+variable "cost_optimization" {
+  type        = string
+  description = "CostOptimization tag value."
+  default     = "enabled"
 }
 
 variable "vpc_cidr" {
@@ -60,4 +62,44 @@ variable "api_port" {
   type        = number
   description = "Backend app port behind nginx."
   default     = 8080
+}
+
+variable "db_name" {
+  type        = string
+  description = "Initial PostgreSQL database name."
+  default     = "gamya"
+}
+
+variable "db_username" {
+  type        = string
+  description = "RDS master username (stored in SSM Parameter Store)."
+  default     = "gamya_admin"
+}
+
+# ------------------------------------------------------------------------------
+# Cost scheduler (EC2 + RDS daily stop/start, IST)
+# ------------------------------------------------------------------------------
+
+variable "enable_cost_schedule" {
+  type        = bool
+  description = "Enable daily EC2+RDS stop (00:00 IST) and start (09:00 IST)."
+  default     = true
+}
+
+variable "schedule_timezone" {
+  type        = string
+  description = "IANA timezone for cost scheduler."
+  default     = "Asia/Kolkata"
+}
+
+variable "schedule_stop_expression" {
+  type        = string
+  description = "EventBridge cron for nightly stop (default 12:00 AM in schedule_timezone)."
+  default     = "cron(0 0 * * ? *)"
+}
+
+variable "schedule_start_expression" {
+  type        = string
+  description = "EventBridge cron for morning start (default 9:00 AM in schedule_timezone)."
+  default     = "cron(0 9 * * ? *)"
 }
