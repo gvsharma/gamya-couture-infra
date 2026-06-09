@@ -57,7 +57,7 @@ resource "aws_iam_role_policy_attachment" "ssm" {
 }
 
 resource "aws_iam_role_policy_attachment" "additional" {
-  for_each = toset(var.additional_iam_policy_arns)
+  for_each = var.additional_iam_policy_arns
 
   role       = aws_iam_role.api.name
   policy_arn = each.value

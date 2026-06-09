@@ -9,6 +9,7 @@
 | EC2 | Amazon Linux 2023, `t3.micro` |
 | RDS | PostgreSQL 17, `db.t4g.micro`, 20 GB gp3 (private) |
 | Scheduler | EC2+RDS stop 00:00 IST / start 09:00 IST |
+| Backend deploy | S3 JAR bucket + GitHub OIDC → SSM (no SSH from runners) |
 | Tags | `Owner=Venkat`, `CostOptimization=enabled`, `AutoShutdown=true` |
 | State | `s3://gamya-couture-terraform-state/infra/dev/terraform.tfstate` |
 | Account | `085863558134` |
@@ -23,7 +24,13 @@ terraform plan -var-file=ci.tfvars             # CI uses ci.tfvars
 terraform apply -var-file=ci.tfvars
 ```
 
-Modules apply in dependency order: VPC → security groups → RDS → EC2 → scheduler.
+Modules apply in dependency order: VPC → security groups → RDS → deploy S3 → EC2 → GitHub deploy IAM → scheduler.
+
+After apply, configure `gamyaboutique` GitHub Actions:
+
+```bash
+terraform output -json backend_deploy_github_setup
+```
 
 Disable nightly shutdown: `enable_cost_schedule = false` in tfvars.
 
