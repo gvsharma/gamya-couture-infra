@@ -94,8 +94,8 @@ resource "aws_iam_role" "lambda" {
   assume_role_policy = data.aws_iam_policy_document.lambda_assume.json
 
   tags = {
-    Name             = "${var.name_prefix}-cost-scheduler-lambda-role"
-    ResourcePurpose  = "cost-scheduler-lambda-iam"
+    Name            = "${var.name_prefix}-cost-scheduler-lambda-role"
+    ResourcePurpose = "cost-scheduler-lambda-iam"
   }
 }
 

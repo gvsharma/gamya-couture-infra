@@ -246,12 +246,12 @@ output "provisioned_resources" {
     }
 
     networking = {
-      vpc_id               = module.vpc.vpc_id
-      vpc_cidr             = module.vpc.vpc_cidr_block
-      public_subnet_id     = module.vpc.public_subnet_id
-      private_subnet_ids   = module.vpc.private_subnet_ids
-      internet_gateway_id  = module.vpc.internet_gateway_id
-      availability_zones   = module.vpc.availability_zones
+      vpc_id              = module.vpc.vpc_id
+      vpc_cidr            = module.vpc.vpc_cidr_block
+      public_subnet_id    = module.vpc.public_subnet_id
+      private_subnet_ids  = module.vpc.private_subnet_ids
+      internet_gateway_id = module.vpc.internet_gateway_id
+      availability_zones  = module.vpc.availability_zones
     }
 
     security_groups = {
@@ -296,7 +296,7 @@ output "provisioned_resources" {
       start_schedule = module.scheduler[0].start_schedule_arn
       schedules_ec2  = module.scheduler[0].schedule_ec2
       schedules_rds  = module.scheduler[0].schedule_rds
-    } : {
+      } : {
       enabled = false
     }
 
