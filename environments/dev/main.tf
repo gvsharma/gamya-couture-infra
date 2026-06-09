@@ -31,6 +31,13 @@ module "rds" {
   parameter_store_prefix = local.db_parameter_store_prefix
 }
 
+module "backend_deploy_artifacts" {
+  count  = var.enable_backend_ssm_deploy ? 1 : 0
+  source = "../../modules/backend-deploy-s3"
+
+  name_prefix = local.name_prefix
+}
+
 module "ec2" {
   source = "../../modules/ec2-api"
 
@@ -40,8 +47,33 @@ module "ec2" {
   instance_type      = var.ec2_instance_type
   key_name           = var.ec2_key_name
   api_port           = var.api_port
+  ssh_authorized_keys = var.ssh_authorized_keys
+  db_endpoint        = module.rds.db_endpoint
+  db_name            = var.db_name
+  db_username        = var.db_username
+
+  # cloud-init runs at launch only — replace EC2 when bootstrap content changes.
+  user_data_replace_on_change = length(var.ssh_authorized_keys) > 0 || var.enable_backend_ssm_deploy
 
   db_parameter_store_prefix = local.db_parameter_store_prefix
+  additional_iam_policy_arns = var.enable_backend_ssm_deploy ? {
+    backend_deploy_s3 = module.backend_deploy_artifacts[0].ec2_read_policy_arn
+  } : {}
+}
+
+module "ci_backend_deploy" {
+  count  = var.enable_backend_ssm_deploy ? 1 : 0
+  source = "../../modules/ci-backend-deploy-iam"
+
+  name_prefix       = local.name_prefix
+  github_repository = var.github_backend_repository
+  deploy_bucket_arn = module.backend_deploy_artifacts[0].bucket_arn
+  ec2_instance_arn  = module.ec2.instance_arn
+  create_oidc_provider = false
+
+  allowed_ref_subjects = [
+    "repo:${var.github_backend_repository}:ref:refs/heads/main",
+  ]
 }
 
 module "scheduler" {

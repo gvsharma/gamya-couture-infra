@@ -233,6 +233,42 @@ output "cost_schedule_start_arn" {
 }
 
 # ------------------------------------------------------------------------------
+# Backend SSM deploy (GitHub Actions → S3 → SSM → EC2)
+# ------------------------------------------------------------------------------
+
+output "backend_deploy_enabled" {
+  description = "Whether SSM-based backend deploy IAM + S3 are provisioned."
+  value       = var.enable_backend_ssm_deploy
+}
+
+output "backend_deploy_bucket" {
+  description = "S3 bucket for GitHub Actions JAR uploads."
+  value       = try(module.backend_deploy_artifacts[0].bucket_name, null)
+}
+
+output "backend_deploy_object_key" {
+  description = "S3 object key for the deploy JAR."
+  value       = try(module.backend_deploy_artifacts[0].deploy_object_key, null)
+}
+
+output "backend_deploy_role_arn" {
+  description = "GitHub Actions OIDC role ARN — set as secret AWS_BACKEND_DEPLOY_ROLE_ARN."
+  value       = try(module.ci_backend_deploy[0].deploy_role_arn, null)
+}
+
+output "backend_deploy_github_setup" {
+  description = "GitHub repository variables/secrets for deploy.yml after apply."
+  value = var.enable_backend_ssm_deploy ? {
+    secret_AWS_BACKEND_DEPLOY_ROLE_ARN = module.ci_backend_deploy[0].deploy_role_arn
+    variable_DEPLOY_BUCKET             = module.backend_deploy_artifacts[0].bucket_name
+    variable_EC2_INSTANCE_ID           = module.ec2.instance_id
+    variable_EC2_HOST                  = module.ec2.public_ip
+    variable_APP_PATH                  = module.ec2.app_path
+    variable_AWS_REGION                = var.aws_region
+  } : null
+}
+
+# ------------------------------------------------------------------------------
 # Consolidated summary — mirrors terraform plan modules/resources
 # ------------------------------------------------------------------------------
 

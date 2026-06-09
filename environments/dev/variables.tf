@@ -58,6 +58,24 @@ variable "ec2_key_name" {
   default     = null
 }
 
+variable "ssh_authorized_keys" {
+  type        = list(string)
+  description = "Public keys for ec2-user authorized_keys at launch (optional admin SSH)."
+  default     = []
+}
+
+variable "github_backend_repository" {
+  type        = string
+  description = "GitHub repo for backend deploy OIDC (org/repo)."
+  default     = "gvsharma/gamyaboutique"
+}
+
+variable "enable_backend_ssm_deploy" {
+  type        = bool
+  description = "Create S3 deploy bucket + GitHub OIDC role for SSM-based backend deploy."
+  default     = true
+}
+
 variable "api_port" {
   type        = number
   description = "Backend app port behind nginx."
