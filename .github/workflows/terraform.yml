@@ -108,7 +108,7 @@ jobs:
       - name: Terraform plan
         run: |
           set -o pipefail
-          terraform plan -no-color -var-file=ci.tfvars -out=tfplan | tee plan.txt
+          terraform plan -no-color -lock-timeout=10m -var-file=ci.tfvars -out=tfplan | tee plan.txt
 
       - name: Publish plan to job summary
         if: always()
@@ -205,4 +205,4 @@ jobs:
         run: terraform init -input=false
 
       - name: Terraform apply
-        run: terraform apply -no-color -auto-approve tfplan
+        run: terraform apply -no-color -lock-timeout=10m -auto-approve tfplan
