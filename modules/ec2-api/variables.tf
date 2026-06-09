@@ -43,8 +43,14 @@ variable "root_volume_size_gb" {
   default     = 8
 }
 
+variable "db_parameter_store_prefix" {
+  type        = string
+  description = "SSM path prefix for DB credentials (e.g. /gamya-couture/dev/db). Grants read on username/password parameters."
+  default     = ""
+}
+
 variable "additional_iam_policy_arns" {
   type        = list(string)
-  description = "Extra IAM policy ARNs to attach to the API instance role (e.g. RDS SSM read)."
+  description = "Extra IAM policy ARNs to attach to the API instance role (must be known at plan time)."
   default     = []
 }

@@ -41,9 +41,7 @@ module "ec2" {
   key_name           = var.ec2_key_name
   api_port           = var.api_port
 
-  additional_iam_policy_arns = compact([
-    module.rds.db_secrets_read_policy_arn,
-  ])
+  db_parameter_store_prefix = local.db_parameter_store_prefix
 }
 
 module "scheduler" {
@@ -51,10 +49,10 @@ module "scheduler" {
   source = "../../modules/scheduler"
 
   name_prefix            = local.name_prefix
-  db_instance_identifier = module.rds.db_instance_id
-  db_instance_arn        = module.rds.db_instance_arn
+  db_instance_identifier = local.rds_instance_identifier
   ec2_instance_id        = module.ec2.instance_id
-  ec2_instance_arn       = module.ec2.instance_arn
+  schedule_rds           = true
+  schedule_ec2           = true
 
   timezone                  = var.schedule_timezone
   stop_schedule_expression  = var.schedule_stop_expression
