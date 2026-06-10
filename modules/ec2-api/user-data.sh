@@ -62,6 +62,7 @@ server {
     listen 80 default_server;
     listen [::]:80 default_server;
     server_name _;
+    client_max_body_size 15M;
 
     location /health {
         access_log off;

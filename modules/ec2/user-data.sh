@@ -61,6 +61,7 @@ server {
     listen 80 default_server;
     listen [::]:80 default_server;
     server_name _ api.gamyacouture.com admin.gamyacouture.com origin-api.gamyacouture.com;
+    client_max_body_size 15M;
 
     access_log /opt/gamya-couture/logs/nginx/access.log;
     error_log  /opt/gamya-couture/logs/nginx/error.log warn;
