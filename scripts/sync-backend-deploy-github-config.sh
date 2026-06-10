@@ -4,6 +4,11 @@
 # Auth: GH_TOKEN or GITHUB_TOKEN with repo scope on gvsharma/gamyaboutique.
 set -euo pipefail
 
+if [[ -z "${GH_TOKEN:-}" ]]; then
+  echo "GAMYABOUTIQUE_GH_TOKEN not configured — skipping auto-sync."
+  exit 0
+fi
+
 REPO="${GITHUB_BACKEND_REPOSITORY:-gvsharma/gamyaboutique}"
 WORKING_DIR="${TF_WORKING_DIR:-environments/dev}"
 
