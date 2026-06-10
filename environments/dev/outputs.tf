@@ -268,6 +268,46 @@ output "backend_deploy_github_setup" {
   } : null
 }
 
+
+# ------------------------------------------------------------------------------
+# Product media CDN (S3 + CloudFront)
+# ------------------------------------------------------------------------------
+
+output "product_media_enabled" {
+  description = "Whether product media CDN is provisioned."
+  value       = var.enable_product_media_cdn
+}
+
+output "product_media_bucket" {
+  description = "S3 bucket for product images."
+  value       = try(module.product_media_cdn[0].bucket_id, null)
+}
+
+output "product_media_cdn_domain" {
+  description = "CloudFront domain for product image URLs."
+  value       = try(module.product_media_cdn[0].distribution_domain_name, null)
+}
+
+output "product_media_public_base_url" {
+  description = "Set APP_STORAGE_S3_PUBLIC_BASE_URL on EC2."
+  value       = try(module.product_media_cdn[0].public_base_url, null)
+}
+
+output "product_media_ec2_env_hint" {
+  description = "S3 settings for /opt/gamya-couture/config/application.env on EC2."
+  value       = try(module.product_media_cdn[0].ec2_env_hint, null)
+}
+
+output "product_media_vercel_env_hint" {
+  description = "Vercel env for next/image (NEXT_PUBLIC_IMAGE_CDN_HOST)."
+  value       = try(module.product_media_cdn[0].vercel_env_hint, null)
+}
+
+output "product_media_ec2_upload_policy_arn" {
+  description = "IAM policy attached to EC2 for S3 media uploads."
+  value       = try(module.product_media_cdn[0].ec2_upload_policy_arn, null)
+}
+
 # ------------------------------------------------------------------------------
 # Consolidated summary — mirrors terraform plan modules/resources
 # ------------------------------------------------------------------------------

@@ -10,6 +10,7 @@
 | RDS | PostgreSQL 17, `db.t4g.micro`, 20 GB gp3 (private) |
 | Scheduler | EC2+RDS stop 00:00 IST / start 09:00 IST |
 | Backend deploy | S3 JAR bucket + GitHub OIDC → SSM (no SSH from runners) |
+| Product media | Private S3 `gamya-couture-dev-media` + CloudFront CDN (OAC) |
 | Tags | `Owner=Venkat`, `CostOptimization=enabled`, `AutoShutdown=true` |
 | State | `s3://gamya-couture-terraform-state/infra/dev/terraform.tfstate` |
 | Account | `085863558134` |
@@ -24,7 +25,16 @@ terraform plan -var-file=ci.tfvars             # CI uses ci.tfvars
 terraform apply -var-file=ci.tfvars
 ```
 
-Modules apply in dependency order: VPC → security groups → RDS → deploy S3 → EC2 → GitHub deploy IAM → scheduler.
+Modules apply in dependency order: VPC → security groups → RDS → deploy S3 → product media CDN → EC2 → GitHub deploy IAM → scheduler.
+
+After apply, sync product image URLs:
+
+```bash
+terraform output product_media_ec2_env_hint
+terraform output product_media_vercel_env_hint
+```
+
+Set `APP_STORAGE_S3_PUBLIC_BASE_URL` on EC2 and `NEXT_PUBLIC_IMAGE_CDN_HOST` on Vercel to the CloudFront domain.
 
 After apply, configure `gamyaboutique` GitHub Actions:
 

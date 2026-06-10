@@ -76,6 +76,25 @@ variable "enable_backend_ssm_deploy" {
   default     = true
 }
 
+
+variable "enable_product_media_cdn" {
+  type        = bool
+  description = "CloudFront CDN + IAM for private S3 product images (gamya-couture-dev-media)."
+  default     = true
+}
+
+variable "product_media_bucket_name" {
+  type        = string
+  description = "Existing S3 bucket for product images (used when enable_product_media_cdn=true)."
+  default     = "gamya-couture-dev-media"
+}
+
+variable "product_media_manage_bucket" {
+  type        = bool
+  description = "Create the media bucket via Terraform. Keep false when the bucket already exists."
+  default     = false
+}
+
 variable "api_port" {
   type        = number
   description = "Backend app port behind nginx."

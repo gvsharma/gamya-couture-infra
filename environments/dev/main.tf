@@ -38,6 +38,15 @@ module "backend_deploy_artifacts" {
   name_prefix = local.name_prefix
 }
 
+module "product_media_cdn" {
+  count  = var.enable_product_media_cdn ? 1 : 0
+  source = "../../modules/product-media-cdn"
+
+  name_prefix   = local.name_prefix
+  bucket_name   = var.product_media_bucket_name
+  manage_bucket = var.product_media_manage_bucket
+}
+
 module "ec2" {
   source = "../../modules/ec2-api"
 
@@ -56,9 +65,14 @@ module "ec2" {
   user_data_replace_on_change = length(var.ssh_authorized_keys) > 0 || var.enable_backend_ssm_deploy
 
   db_parameter_store_prefix = local.db_parameter_store_prefix
-  additional_iam_policy_arns = var.enable_backend_ssm_deploy ? {
-    backend_deploy_s3 = module.backend_deploy_artifacts[0].ec2_read_policy_arn
-  } : {}
+  additional_iam_policy_arns = merge(
+    var.enable_backend_ssm_deploy ? {
+      backend_deploy_s3 = module.backend_deploy_artifacts[0].ec2_read_policy_arn
+    } : {},
+    var.enable_product_media_cdn ? {
+      product_media_upload = module.product_media_cdn[0].ec2_upload_policy_arn
+    } : {},
+  )
 }
 
 module "ci_backend_deploy" {
