@@ -96,6 +96,26 @@ data "aws_iam_policy_document" "deploy" {
     ]
     resources = ["*"]
   }
+
+  statement {
+    sid    = "PreflightDeployTarget"
+    effect = "Allow"
+    actions = [
+      "ssm:DescribeInstanceInformation",
+      "ec2:DescribeInstances",
+      "ec2:DescribeInstanceStatus",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "StartDeployTargetIfStopped"
+    effect = "Allow"
+    actions = [
+      "ec2:StartInstances",
+    ]
+    resources = [var.ec2_instance_arn]
+  }
 }
 
 resource "aws_iam_role_policy" "deploy" {
