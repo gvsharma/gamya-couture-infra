@@ -96,6 +96,16 @@ data "aws_iam_policy_document" "deploy" {
     ]
     resources = ["*"]
   }
+
+  statement {
+    sid    = "PreflightDeployTarget"
+    effect = "Allow"
+    actions = [
+      "ssm:DescribeInstanceInformation",
+      "ec2:DescribeInstances",
+    ]
+    resources = ["*"]
+  }
 }
 
 resource "aws_iam_role_policy" "deploy" {
