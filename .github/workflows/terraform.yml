@@ -215,3 +215,32 @@ jobs:
 
       - name: Terraform apply
         run: terraform apply -no-color -lock-timeout=10m -auto-approve tfplan
+
+      - name: Publish backend deploy GitHub config
+        if: success()
+        run: |
+          SETUP="$(terraform output -json backend_deploy_github_setup)"
+          if [[ "$SETUP" == "null" ]]; then
+            echo "SSM backend deploy disabled — skipping GitHub config summary."
+            exit 0
+          fi
+          {
+            echo "### Backend deploy — update gvsharma/gamyaboutique Actions config"
+            echo ""
+            echo "If deploy fails with SSM \`Unknown\` or \`None\`, the repo likely has a **stale EC2_INSTANCE_ID** after Terraform replaced the instance."
+            echo ""
+            echo "| Setting | Value |"
+            echo "|---------|-------|"
+            echo "| Secret \`AWS_BACKEND_DEPLOY_ROLE_ARN\` | \`$(echo "$SETUP" | jq -r '.secret_AWS_BACKEND_DEPLOY_ROLE_ARN')\` |"
+            echo "| Variable \`DEPLOY_BUCKET\` | \`$(echo "$SETUP" | jq -r '.variable_DEPLOY_BUCKET')\` |"
+            echo "| Variable \`EC2_INSTANCE_ID\` | \`$(echo "$SETUP" | jq -r '.variable_EC2_INSTANCE_ID')\` |"
+            echo "| Variable \`EC2_HOST\` | \`$(echo "$SETUP" | jq -r '.variable_EC2_HOST')\` |"
+            echo ""
+            echo "Auto-sync when \`GAMYABOUTIQUE_GH_TOKEN\` secret is configured on this repo."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Sync backend deploy config to gamyaboutique
+        if: success() && secrets.GAMYABOUTIQUE_GH_TOKEN != ''
+        env:
+          GH_TOKEN: ${{ secrets.GAMYABOUTIQUE_GH_TOKEN }}
+        run: bash ../../scripts/sync-backend-deploy-github-config.sh

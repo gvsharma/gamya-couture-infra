@@ -103,8 +103,18 @@ data "aws_iam_policy_document" "deploy" {
     actions = [
       "ssm:DescribeInstanceInformation",
       "ec2:DescribeInstances",
+      "ec2:DescribeInstanceStatus",
     ]
     resources = ["*"]
+  }
+
+  statement {
+    sid    = "StartDeployTargetIfStopped"
+    effect = "Allow"
+    actions = [
+      "ec2:StartInstances",
+    ]
+    resources = [var.ec2_instance_arn]
   }
 }
 

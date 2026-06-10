@@ -32,6 +32,14 @@ After apply, configure `gamyaboutique` GitHub Actions:
 terraform output -json backend_deploy_github_setup
 ```
 
+Or auto-sync (requires a PAT with `repo` scope on `gvsharma/gamyaboutique` stored as secret `GAMYABOUTIQUE_GH_TOKEN` on this repo):
+
+```bash
+GAMYABOUTIQUE_GH_TOKEN=ghp_... bash ../../scripts/sync-backend-deploy-github-config.sh
+```
+
+If deploy fails with SSM `Unknown`/`None`, the backend repo usually has a **stale `EC2_INSTANCE_ID`** after Terraform replaces the EC2 instance — re-run the sync above.
+
 Disable nightly shutdown: `enable_cost_schedule = false` in tfvars.
 
 Monthly cost estimate: [docs/COST_ESTIMATE.md](../../docs/COST_ESTIMATE.md)
