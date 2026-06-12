@@ -265,6 +265,7 @@ output "backend_deploy_github_setup" {
     variable_EC2_HOST                  = module.ec2.public_ip
     variable_APP_PATH                  = module.ec2.app_path
     variable_AWS_REGION                = var.aws_region
+    terraform_managed_github_config    = length(module.github_backend_deploy_config) > 0
   } : null
 }
 

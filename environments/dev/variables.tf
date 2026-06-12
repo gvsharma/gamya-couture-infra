@@ -70,6 +70,13 @@ variable "github_backend_repository" {
   default     = "gvsharma/gamyaboutique"
 }
 
+variable "github_token" {
+  type        = string
+  description = "GitHub PAT with repo scope on github_backend_repository. When set, Terraform manages gamyaboutique Actions deploy variables/secrets after apply."
+  sensitive   = true
+  default     = null
+}
+
 variable "enable_backend_ssm_deploy" {
   type        = bool
   description = "Create S3 deploy bucket + GitHub OIDC role for SSM-based backend deploy."

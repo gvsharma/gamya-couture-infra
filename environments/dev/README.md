@@ -42,13 +42,26 @@ After apply, configure `gamyaboutique` GitHub Actions:
 terraform output -json backend_deploy_github_setup
 ```
 
-Or auto-sync (requires a PAT with `repo` scope on `gvsharma/gamyaboutique` stored as secret `GAMYABOUTIQUE_GH_TOKEN` on this repo):
+**Auto-sync (recommended):** store a PAT with `repo` scope on `gvsharma/gamyaboutique` as secret `GAMYABOUTIQUE_GH_TOKEN` on this repo. Terraform apply then updates gamyaboutique Actions variables/secrets via the `github-backend-deploy-config` module.
+
+Manual fallback:
 
 ```bash
 GAMYABOUTIQUE_GH_TOKEN=ghp_... bash ../../scripts/sync-backend-deploy-github-config.sh
 ```
 
-If deploy fails with SSM `Unknown`/`None`, the backend repo usually has a **stale `EC2_INSTANCE_ID`** after Terraform replaces the EC2 instance — re-run the sync above.
+Or local apply with token: `TF_VAR_github_token=ghp_... terraform apply -var-file=ci.tfvars`
+
+`EC2_HOST` is the **Elastic IP** (`module.ec2-api`); it stays stable across stop/start. Backend deploy also resolves the instance by tag `gamya-couture-dev-api` if `EC2_INSTANCE_ID` is stale.
+
+**First apply with Terraform-managed GitHub config:** if variables already exist on gamyaboutique, import once before apply:
+
+```bash
+terraform import 'module.github_backend_deploy_config[0].github_actions_variable.deploy_bucket' gamyaboutique:DEPLOY_BUCKET
+terraform import 'module.github_backend_deploy_config[0].github_actions_variable.ec2_instance_id' gamyaboutique:EC2_INSTANCE_ID
+terraform import 'module.github_backend_deploy_config[0].github_actions_variable.ec2_host' gamyaboutique:EC2_HOST
+terraform import 'module.github_backend_deploy_config[0].github_actions_secret.aws_backend_deploy_role_arn' gamyaboutique:AWS_BACKEND_DEPLOY_ROLE_ARN
+```
 
 Disable nightly shutdown: `enable_cost_schedule = false` in tfvars.
 
