@@ -90,6 +90,17 @@ module "ci_backend_deploy" {
   ]
 }
 
+module "github_backend_deploy_config" {
+  count  = var.enable_backend_ssm_deploy && var.github_token != null ? 1 : 0
+  source = "../../modules/github-backend-deploy-config"
+
+  repository      = var.github_backend_repository
+  deploy_role_arn = module.ci_backend_deploy[0].deploy_role_arn
+  deploy_bucket   = module.backend_deploy_artifacts[0].bucket_name
+  ec2_instance_id = module.ec2.instance_id
+  ec2_host        = module.ec2.public_ip
+}
+
 module "scheduler" {
   count  = var.enable_cost_schedule ? 1 : 0
   source = "../../modules/scheduler"

@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
+    github = {
+      source  = "integrations/github"
+      version = "~> 6.0"
+    }
     random = {
       source  = "hashicorp/random"
       version = ">= 3.6"
@@ -19,6 +23,11 @@ provider "aws" {
   default_tags {
     tags = module.tags.common_tags
   }
+}
+
+provider "github" {
+  owner = split("/", var.github_backend_repository)[0]
+  token = coalesce(var.github_token, "")
 }
 
 module "tags" {
