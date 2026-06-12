@@ -27,7 +27,8 @@ provider "aws" {
 
 provider "github" {
   owner = split("/", var.github_backend_repository)[0]
-  token = coalesce(var.github_token, "")
+  # null → GitHub provider reads GITHUB_TOKEN; CI sets TF_VAR_github_token from GAMYABOUTIQUE_GH_TOKEN
+  token = var.github_token
 }
 
 module "tags" {

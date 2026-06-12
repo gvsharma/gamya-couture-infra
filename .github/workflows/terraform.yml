@@ -218,7 +218,21 @@ jobs:
         run: terraform init -input=false
 
       - name: Terraform apply
-        run: terraform apply -no-color -lock-timeout=10m -auto-approve tfplan
+        run: |
+          set -euo pipefail
+          apply_log="$(mktemp)"
+          if terraform apply -no-color -lock-timeout=10m -auto-approve tfplan >"$apply_log" 2>&1; then
+            cat "$apply_log"
+            exit 0
+          fi
+          cat "$apply_log"
+          if grep -q 'Saved plan is stale' "$apply_log"; then
+            echo "Saved plan is stale (state changed since plan job). Regenerating plan and applying..."
+            terraform plan -no-color -lock-timeout=10m -var-file=ci.tfvars -out=tfplan
+            terraform apply -no-color -lock-timeout=10m -auto-approve tfplan
+          else
+            exit 1
+          fi
 
       - name: Publish backend deploy GitHub config
         if: success()
