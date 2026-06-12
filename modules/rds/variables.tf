@@ -32,8 +32,14 @@ variable "parameter_store_prefix" {
 
 variable "engine_version" {
   type        = string
-  description = "PostgreSQL major/minor version on RDS."
-  default     = "16"
+  description = "PostgreSQL engine version on RDS (major version resolves to latest stable minor)."
+  default     = "17"
+}
+
+variable "enable_cloudwatch_logs_exports" {
+  type        = bool
+  description = "Export PostgreSQL logs to CloudWatch (adds cost). Disabled by default for MVP."
+  default     = false
 }
 
 variable "instance_class" {
@@ -49,8 +55,8 @@ variable "allocated_storage_gb" {
 }
 
 variable "storage_type" {
-  type        = string
-  default     = "gp3"
+  type    = string
+  default = "gp3"
 }
 
 variable "log_retention_days" {

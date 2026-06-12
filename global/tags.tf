@@ -1,4 +1,5 @@
-# Shared tagging — merged into provider default_tags in each environment.
+# Centralized tagging — merged into provider default_tags in each environment.
+# Resource-specific tags (Name, ResourcePurpose, Tier) are set per resource in modules.
 
 variable "project" {
   type        = string
@@ -13,23 +14,30 @@ variable "environment" {
 
 variable "owner" {
   type        = string
-  description = "Team or individual responsible for the stack."
-  default     = "platform"
+  description = "Individual or team responsible for the stack."
+  default     = "Venkat"
 }
 
-variable "cost_center" {
+variable "cost_optimization" {
   type        = string
-  description = "Cost center or billing code."
-  default     = "mvp"
+  description = "Whether cost controls (scheduling, minimal SKUs) are active."
+  default     = "enabled"
+}
+
+variable "auto_shutdown" {
+  type        = string
+  description = "Whether daily auto stop/start scheduling is enabled for this environment."
+  default     = "true"
 }
 
 locals {
   common_tags = {
-    Project     = var.project
-    Environment = var.environment
-    ManagedBy   = "terraform"
-    Owner       = var.owner
-    CostCenter  = var.cost_center
+    Project          = var.project
+    Environment      = var.environment
+    ManagedBy        = "terraform"
+    Owner            = var.owner
+    CostOptimization = var.cost_optimization
+    AutoShutdown     = var.auto_shutdown
   }
 }
 

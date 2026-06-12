@@ -4,6 +4,7 @@
 aws_region  = "ap-south-1"
 environment = "dev"
 project     = "gamya-couture"
+owner       = "Venkat"
 
 vpc_cidr = "10.50.0.0/16"
 
@@ -14,3 +15,22 @@ enable_ssh = true
 ec2_instance_type = "t3.micro"
 api_port          = 8080
 # ec2_key_name    = "my-keypair"
+
+# Optional admin SSH keys (cloud-init). CI deploy uses SSM — no deploy key required.
+# ssh_authorized_keys = ["ssh-ed25519 AAAA... your-admin-key"]
+
+# SSM deploy: S3 bucket + GitHub OIDC role (gvsharma/gamyaboutique)
+enable_backend_ssm_deploy = true
+github_backend_repository = "gvsharma/gamyaboutique"
+
+db_name     = "gamya"
+db_username = "gamya_admin"
+
+# Daily cost savings: stop 12:00 AM IST, start 9:00 AM IST
+enable_cost_schedule      = true
+schedule_timezone         = "Asia/Kolkata"
+schedule_stop_expression  = "cron(0 0 * * ? *)"
+schedule_start_expression = "cron(0 9 * * ? *)"
+
+# Set false to run EC2+RDS 24/7 (e.g. demo week)
+# enable_cost_schedule = false

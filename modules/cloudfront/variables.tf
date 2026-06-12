@@ -61,8 +61,8 @@ variable "acm_certificate_arn" {
 }
 
 variable "default_root_object" {
-  type        = string
-  default     = "index.html"
+  type    = string
+  default = "index.html"
 }
 
 variable "price_class" {
@@ -90,8 +90,8 @@ variable "enable_image_optimization_headers" {
 }
 
 variable "comment" {
-  type        = string
-  default     = "Gamya Couture CDN"
+  type    = string
+  default = "Gamya Couture CDN"
 }
 
 variable "enable_api_distribution" {

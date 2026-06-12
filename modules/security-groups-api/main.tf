@@ -1,6 +1,6 @@
 resource "aws_security_group" "api" {
   name_prefix = "${var.name_prefix}-api-"
-  description = "Gamya Couture API EC2 — HTTP/HTTPS public, SSH restricted."
+  description = "Gamya Couture API EC2 - HTTP/HTTPS public, SSH restricted."
   vpc_id      = var.vpc_id
 
   lifecycle {
@@ -8,8 +8,9 @@ resource "aws_security_group" "api" {
   }
 
   tags = {
-    Name = "${var.name_prefix}-api-sg"
-    Tier = "app"
+    Name            = "${var.name_prefix}-api-sg"
+    Tier            = "app"
+    ResourcePurpose = "security-group-api-ec2"
   }
 }
 
@@ -51,4 +52,33 @@ resource "aws_vpc_security_group_egress_rule" "all" {
   description       = "Outbound for updates and external APIs"
   ip_protocol       = "-1"
   cidr_ipv4         = "0.0.0.0/0"
+}
+
+# ------------------------------------------------------------------------------
+# RDS PostgreSQL security group — EC2 SG to SG only (no CIDR / public access)
+# ------------------------------------------------------------------------------
+
+resource "aws_security_group" "rds" {
+  name_prefix = "${var.name_prefix}-rds-"
+  description = "Gamya Couture RDS - PostgreSQL from API EC2 security group only."
+  vpc_id      = var.vpc_id
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  tags = {
+    Name            = "${var.name_prefix}-rds-sg"
+    Tier            = "data"
+    ResourcePurpose = "security-group-rds-postgres"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "rds_postgres_from_api" {
+  security_group_id            = aws_security_group.rds.id
+  description                  = "PostgreSQL from API EC2 only"
+  from_port                    = 5432
+  to_port                      = 5432
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.api.id
 }

@@ -105,22 +105,27 @@ output "ssm_db_password_parameter" {
 }
 
 # ------------------------------------------------------------------------------
-# RDS scheduler
+# Cost scheduler (EC2 + RDS)
 # ------------------------------------------------------------------------------
 
-output "rds_schedule_enabled" {
-  description = "Whether daily RDS stop/start schedules are active."
-  value       = var.enable_rds_schedule
+output "cost_schedule_enabled" {
+  description = "Whether daily EC2+RDS stop/start schedules are active."
+  value       = var.enable_cost_schedule
 }
 
-output "rds_stop_schedule_local" {
-  description = "RDS stop time in IST."
+output "cost_schedule_stop_local" {
+  description = "Nightly stop time (IST by default)."
   value       = try(module.scheduler[0].stop_schedule_local_time, null)
 }
 
-output "rds_start_schedule_local" {
-  description = "RDS start time in IST."
+output "cost_schedule_start_local" {
+  description = "Morning start time (IST by default)."
   value       = try(module.scheduler[0].start_schedule_local_time, null)
+}
+
+output "cost_scheduler_lambda_name" {
+  description = "Cost scheduler Lambda function name."
+  value       = try(module.scheduler[0].lambda_function_name, null)
 }
 
 # ------------------------------------------------------------------------------

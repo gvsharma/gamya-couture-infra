@@ -9,8 +9,8 @@ Workflow: [`.github/workflows/terraform.yml`](../.github/workflows/terraform.yml
 | AWS account | `085863558134` |
 | Region | `ap-south-1` |
 | State key | `infra/dev/terraform.tfstate` |
-| Secret | `AWS_ROLE_ARN` |
-| GitHub Environment | `development` |
+| Role ARN | `vars.AWS_ROLE_ARN` or secret `AWS_ROLE_ARN` (workflow falls back to `GitHubTerraformRole`) |
+| GitHub Environment | `development` (both plan and apply) |
 
 **Prod (`environments/prod`) is not deployed by CI** until you change the workflow.
 
@@ -18,17 +18,34 @@ Workflow: [`.github/workflows/terraform.yml`](../.github/workflows/terraform.yml
 
 | Event | Action |
 |-------|--------|
-| PR → `main` | Plan dev only |
-| Push → `main` | Plan + apply dev |
+| PR → `main` | Plan only (apply skipped) |
+| Push → `main` | Plan + auto-apply dev |
 | Manual + `apply=false` | Plan only |
+| Manual + `apply=true` (any branch) | Plan + apply dev (requires **development** environment approval) |
 
 ## Setup checklist
 
 1. Apply `github-oidc/` → get role ARN  
-2. GitHub secret **`AWS_ROLE_ARN`**  
-3. (Optional) **Environments → `development`** — required reviewers  
+2. (Optional) **Variables → `AWS_ROLE_ARN`** or secret **`AWS_ROLE_ARN`** — workflow has a safe default ARN  
+3. **Environments → `development`** — add **Required reviewers** so apply pauses for your approval  
 4. Open PR from feature branch → verify **Terraform / Plan (dev)**  
-5. Merge to `main` → dev stack applies  
+5. To apply **before merge**: **Actions → Terraform → Run workflow** → select branch → **apply = true** → approve deployment  
+6. Or merge to `main` → dev stack applies automatically on push  
+
+## Partial apply / re-run
+
+If apply fails mid-way (e.g. Lambda zip missing), fix the workflow and **re-run** the workflow. Terraform will create only the remaining resources; already-created resources (e.g. RDS) are in state.
+
+## Stale state lock
+
+If CI fails with `Error acquiring the state lock` and **Who** is your laptop, a local `terraform plan/apply` was interrupted. Release it:
+
+```bash
+cd environments/dev
+terraform force-unlock <LOCK_ID>   # ID from the error message
+```
+
+Then re-run the GitHub Actions workflow.
 
 ## Vercel
 

@@ -1,0 +1,51 @@
+# Spring Boot production datasource — Gamya Couture (RDS PostgreSQL)
+#
+# Replace placeholders after `terraform apply`:
+#   <endpoint>  → terraform output -raw db_endpoint
+#   <database>  → terraform output -raw db_name
+#
+# Credentials live in SSM Parameter Store (never commit passwords):
+#   /gamya-couture/dev/db/username
+#   /gamya-couture/dev/db/password
+#
+# EC2 instance role must include module.rds.db_secrets_read_policy_arn.
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    # JDBC URL — host is the private RDS endpoint (VPC-only).
+    url: jdbc:postgresql://<endpoint>:5432/<database>
+    driver-class-name: org.postgresql.Driver
+
+    # Option A (recommended on EC2): resolve credentials at startup via AWS SDK
+    # and set spring.datasource.username / spring.datasource.password in a
+    # @Configuration bean or EnvironmentPostProcessor using the instance profile.
+    #
+    # Option B (deploy script): export before starting the JAR:
+    #   export DB_USER=$(aws ssm get-parameter --name /gamya-couture/dev/db/username --with-decryption --query Parameter.Value --output text)
+    #   export DB_PASSWORD=$(aws ssm get-parameter --name /gamya-couture/dev/db/password --with-decryption --query Parameter.Value --output text)
+    # Then reference: username: ${DB_USER}  password: ${DB_PASSWORD}
+
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
+  sql:
+    init:
+      mode: never

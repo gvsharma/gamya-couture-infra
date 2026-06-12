@@ -6,6 +6,14 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
+    github = {
+      source  = "integrations/github"
+      version = "~> 6.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 3.6"
+    }
   }
 }
 
@@ -17,11 +25,17 @@ provider "aws" {
   }
 }
 
+provider "github" {
+  owner = split("/", var.github_backend_repository)[0]
+  token = coalesce(var.github_token, "")
+}
+
 module "tags" {
   source = "../../global"
 
-  environment = var.environment
-  project     = var.project
-  owner       = var.owner
-  cost_center = var.cost_center
+  environment       = var.environment
+  project           = var.project
+  owner             = var.owner
+  cost_optimization = var.cost_optimization
+  auto_shutdown     = var.enable_cost_schedule ? "true" : "false"
 }

@@ -1,11 +1,11 @@
 output "lambda_function_name" {
-  description = "RDS scheduler Lambda function name."
-  value       = aws_lambda_function.rds_scheduler.function_name
+  description = "Cost scheduler Lambda function name."
+  value       = aws_lambda_function.cost_scheduler.function_name
 }
 
 output "lambda_function_arn" {
-  description = "RDS scheduler Lambda ARN."
-  value       = aws_lambda_function.rds_scheduler.arn
+  description = "Cost scheduler Lambda ARN."
+  value       = aws_lambda_function.cost_scheduler.arn
 }
 
 output "stop_schedule_arn" {
@@ -30,7 +30,17 @@ output "stop_schedule_local_time" {
 
 output "start_schedule_local_time" {
   description = "Human-readable start time in configured timezone."
-  value       = "07:00 daily (${var.timezone})"
+  value       = "09:00 daily (${var.timezone})"
+}
+
+output "schedule_ec2" {
+  description = "Whether EC2 stop/start is configured."
+  value       = local.schedule_ec2
+}
+
+output "schedule_rds" {
+  description = "Whether RDS stop/start is configured."
+  value       = local.schedule_rds
 }
 
 output "cloudwatch_log_group_name" {

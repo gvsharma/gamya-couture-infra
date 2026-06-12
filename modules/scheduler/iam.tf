@@ -21,13 +21,15 @@ data "aws_iam_policy_document" "scheduler_assume" {
 }
 
 data "aws_iam_policy_document" "lambda_rds" {
+  count = local.schedule_rds ? 1 : 0
+
   statement {
     sid    = "DescribeTargetInstance"
     effect = "Allow"
     actions = [
       "rds:DescribeDBInstances",
     ]
-    resources = [var.db_instance_arn]
+    resources = [local.rds_instance_arn]
   }
 
   statement {
@@ -37,7 +39,30 @@ data "aws_iam_policy_document" "lambda_rds" {
       "rds:StopDBInstance",
       "rds:StartDBInstance",
     ]
-    resources = [var.db_instance_arn]
+    resources = [local.rds_instance_arn]
+  }
+}
+
+data "aws_iam_policy_document" "lambda_ec2" {
+  count = local.schedule_ec2 ? 1 : 0
+
+  statement {
+    sid    = "DescribeTargetInstance"
+    effect = "Allow"
+    actions = [
+      "ec2:DescribeInstances",
+    ]
+    resources = [local.ec2_instance_arn]
+  }
+
+  statement {
+    sid    = "StopStartInstance"
+    effect = "Allow"
+    actions = [
+      "ec2:StopInstances",
+      "ec2:StartInstances",
+    ]
+    resources = [local.ec2_instance_arn]
   }
 }
 
@@ -60,23 +85,34 @@ data "aws_iam_policy_document" "scheduler_invoke" {
     actions = [
       "lambda:InvokeFunction",
     ]
-    resources = [aws_lambda_function.rds_scheduler.arn]
+    resources = [aws_lambda_function.cost_scheduler.arn]
   }
 }
 
 resource "aws_iam_role" "lambda" {
-  name_prefix        = "${var.name_prefix}-rds-sched-"
+  name_prefix        = "${var.name_prefix}-cost-sched-"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume.json
 
   tags = {
-    Name = "${var.name_prefix}-rds-scheduler-lambda-role"
+    Name            = "${var.name_prefix}-cost-scheduler-lambda-role"
+    ResourcePurpose = "cost-scheduler-lambda-iam"
   }
 }
 
 resource "aws_iam_role_policy" "lambda_rds" {
+  count = local.schedule_rds ? 1 : 0
+
   name_prefix = "${var.name_prefix}-rds-"
   role        = aws_iam_role.lambda.id
-  policy      = data.aws_iam_policy_document.lambda_rds.json
+  policy      = data.aws_iam_policy_document.lambda_rds[0].json
+}
+
+resource "aws_iam_role_policy" "lambda_ec2" {
+  count = local.schedule_ec2 ? 1 : 0
+
+  name_prefix = "${var.name_prefix}-ec2-"
+  role        = aws_iam_role.lambda.id
+  policy      = data.aws_iam_policy_document.lambda_ec2[0].json
 }
 
 resource "aws_iam_role_policy" "lambda_logging" {
@@ -86,11 +122,12 @@ resource "aws_iam_role_policy" "lambda_logging" {
 }
 
 resource "aws_iam_role" "scheduler" {
-  name_prefix        = "${var.name_prefix}-rds-sch-"
+  name_prefix        = "${var.name_prefix}-cost-sch-"
   assume_role_policy = data.aws_iam_policy_document.scheduler_assume.json
 
   tags = {
-    Name = "${var.name_prefix}-rds-scheduler-invoke-role"
+    Name            = "${var.name_prefix}-cost-scheduler-invoke-role"
+    ResourcePurpose = "cost-scheduler-eventbridge-iam"
   }
 }
 

@@ -11,13 +11,13 @@ variable "aws_account_id" {
 }
 
 variable "github_repository" {
-  type        = string
-  default     = "gvsharma/gamya-couture-infra"
+  type    = string
+  default = "gvsharma/gamya-couture-infra"
 }
 
 variable "role_name" {
-  type        = string
-  default     = "GitHubTerraformRole"
+  type    = string
+  default = "GitHubTerraformRole"
 }
 
 variable "create_oidc_provider" {
@@ -27,6 +27,6 @@ variable "create_oidc_provider" {
 }
 
 variable "attach_administrator_access" {
-  type        = bool
-  default     = true
+  type    = bool
+  default = true
 }

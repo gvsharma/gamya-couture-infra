@@ -87,7 +87,7 @@ resource "aws_vpc_security_group_egress_rule" "ec2_all" {
 
 resource "aws_security_group" "rds" {
   name_prefix = "${var.name_prefix}-rds-"
-  description = "Gamya Couture RDS — PostgreSQL from EC2 security group only."
+  description = "Gamya Couture RDS - PostgreSQL from EC2 security group only."
   vpc_id      = var.vpc_id
 
   lifecycle {

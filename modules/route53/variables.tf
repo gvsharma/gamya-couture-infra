@@ -4,6 +4,6 @@ variable "domain_name" {
 }
 
 variable "comment" {
-  type        = string
-  default     = "Gamya Couture public hosted zone"
+  type    = string
+  default = "Gamya Couture public hosted zone"
 }
