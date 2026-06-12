@@ -54,13 +54,11 @@ Or local apply with token: `TF_VAR_github_token=ghp_... terraform apply -var-fil
 
 `EC2_HOST` is the **Elastic IP** (`module.ec2-api`); it stays stable across stop/start. Backend deploy also resolves the instance by tag `gamya-couture-dev-api` if `EC2_INSTANCE_ID` is stale.
 
-**First apply with Terraform-managed GitHub config:** if variables already exist on gamyaboutique, import once before apply:
+**First apply with Terraform-managed GitHub config:** if variables already exist on gamyaboutique, import once before apply (PAT needs **Actions: Read and write** on `gamyaboutique`):
 
 ```bash
-terraform import 'module.github_backend_deploy_config[0].github_actions_variable.deploy_bucket' gamyaboutique:DEPLOY_BUCKET
-terraform import 'module.github_backend_deploy_config[0].github_actions_variable.ec2_instance_id' gamyaboutique:EC2_INSTANCE_ID
-terraform import 'module.github_backend_deploy_config[0].github_actions_variable.ec2_host' gamyaboutique:EC2_HOST
-terraform import 'module.github_backend_deploy_config[0].github_actions_secret.aws_backend_deploy_role_arn' gamyaboutique:AWS_BACKEND_DEPLOY_ROLE_ARN
+export TF_VAR_github_token=ghp_...
+bash ../../scripts/import-github-backend-deploy-config.sh
 ```
 
 Disable nightly shutdown: `enable_cost_schedule = false` in tfvars.
