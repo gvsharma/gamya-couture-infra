@@ -1,7 +1,7 @@
 resource "github_actions_secret" "aws_backend_deploy_role_arn" {
-  repository      = local.name
-  secret_name     = "AWS_BACKEND_DEPLOY_ROLE_ARN"
-  value = var.deploy_role_arn
+  repository  = local.name
+  secret_name = "AWS_BACKEND_DEPLOY_ROLE_ARN"
+  value       = var.deploy_role_arn
 }
 
 resource "github_actions_variable" "deploy_bucket" {
