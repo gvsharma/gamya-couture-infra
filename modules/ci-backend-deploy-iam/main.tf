@@ -108,6 +108,32 @@ data "aws_iam_policy_document" "deploy" {
     resources = ["*"]
   }
 
+
+  dynamic "statement" {
+    for_each = var.rds_instance_arn != null ? [1] : []
+    content {
+      sid    = "PrepareRdsForDeploy"
+      effect = "Allow"
+      actions = [
+        "rds:DescribeDBInstances",
+        "rds:StartDBInstance",
+      ]
+      resources = [var.rds_instance_arn]
+    }
+  }
+
+  dynamic "statement" {
+    for_each = var.rds_instance_arn != null ? [1] : []
+    content {
+      sid    = "ResolveRdsByTag"
+      effect = "Allow"
+      actions = [
+        "tag:GetResources",
+      ]
+      resources = ["*"]
+    }
+  }
+
   statement {
     sid    = "StartDeployTargetIfStopped"
     effect = "Allow"
