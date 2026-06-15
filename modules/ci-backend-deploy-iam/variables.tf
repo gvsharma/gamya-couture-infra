@@ -35,3 +35,9 @@ variable "allowed_ref_subjects" {
   description = "GitHub OIDC sub claim patterns (e.g. repo:org/repo:ref:refs/heads/main)."
   default     = []
 }
+
+variable "rds_instance_arn" {
+  type        = string
+  description = "RDS instance ARN for deploy-time start/describe (optional)."
+  default     = null
+}

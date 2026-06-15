@@ -83,6 +83,7 @@ module "ci_backend_deploy" {
   github_repository    = var.github_backend_repository
   deploy_bucket_arn    = module.backend_deploy_artifacts[0].bucket_arn
   ec2_instance_arn     = module.ec2.instance_arn
+  rds_instance_arn     = module.rds.db_instance_arn
   create_oidc_provider = false
 
   allowed_ref_subjects = [
