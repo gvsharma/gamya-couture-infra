@@ -368,17 +368,17 @@ output "provisioned_resources" {
     }
 
     scheduler = var.enable_cost_schedule ? {
-      enabled        = true
-      timezone       = module.scheduler[0].timezone
-      summary        = module.scheduler[0].schedule_summary
-      stop_rules     = module.scheduler[0].stop_schedules
-      start_rules    = module.scheduler[0].start_schedules
-      lambda_name    = module.scheduler[0].lambda_function_name
-      lambda_arn     = module.scheduler[0].lambda_function_arn
-      stop_schedules = module.scheduler[0].stop_schedule_arns
+      enabled         = true
+      timezone        = module.scheduler[0].timezone
+      summary         = module.scheduler[0].schedule_summary
+      stop_rules      = module.scheduler[0].stop_schedules
+      start_rules     = module.scheduler[0].start_schedules
+      lambda_name     = module.scheduler[0].lambda_function_name
+      lambda_arn      = module.scheduler[0].lambda_function_arn
+      stop_schedules  = module.scheduler[0].stop_schedule_arns
       start_schedules = module.scheduler[0].start_schedule_arns
-      schedules_ec2  = module.scheduler[0].schedule_ec2
-      schedules_rds  = module.scheduler[0].schedule_rds
+      schedules_ec2   = module.scheduler[0].schedule_ec2
+      schedules_rds   = module.scheduler[0].schedule_rds
       } : {
       enabled = false
     }
