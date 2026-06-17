@@ -33,16 +33,22 @@ variable "timezone" {
   default     = "Asia/Kolkata"
 }
 
-variable "stop_schedule_expression" {
-  type        = string
-  description = "EventBridge Scheduler cron for daily stop (12:00 AM IST default)."
-  default     = "cron(0 0 * * ? *)"
+variable "stop_schedules" {
+  type = map(object({
+    expression  = string
+    description = optional(string, "")
+  }))
+  description = "EventBridge Scheduler stop rules (key = schedule name). Empty map uses built-in Mon–Sun IST defaults."
+  default     = {}
 }
 
-variable "start_schedule_expression" {
-  type        = string
-  description = "EventBridge Scheduler cron for daily start (9:00 AM IST default)."
-  default     = "cron(0 9 * * ? *)"
+variable "start_schedules" {
+  type = map(object({
+    expression  = string
+    description = optional(string, "")
+  }))
+  description = "EventBridge Scheduler start rules (key = schedule name). Empty map uses built-in Mon–Sun IST defaults."
+  default     = {}
 }
 
 variable "log_retention_days" {

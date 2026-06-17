@@ -1,30 +1,30 @@
 resource "aws_lambda_permission" "allow_scheduler_stop" {
-  count = var.enabled ? 1 : 0
+  for_each = var.enabled ? local.stop_schedules : {}
 
-  statement_id  = "AllowExecutionFromEventBridgeSchedulerStop"
+  statement_id  = "AllowExecutionFromEventBridgeSchedulerStop${replace(title(each.key), "_", "")}"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.cost_scheduler.function_name
   principal     = "scheduler.amazonaws.com"
-  source_arn    = aws_scheduler_schedule.stop[0].arn
+  source_arn    = aws_scheduler_schedule.stop[each.key].arn
 }
 
 resource "aws_lambda_permission" "allow_scheduler_start" {
-  count = var.enabled ? 1 : 0
+  for_each = var.enabled ? local.start_schedules : {}
 
-  statement_id  = "AllowExecutionFromEventBridgeSchedulerStart"
+  statement_id  = "AllowExecutionFromEventBridgeSchedulerStart${replace(title(each.key), "_", "")}"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.cost_scheduler.function_name
   principal     = "scheduler.amazonaws.com"
-  source_arn    = aws_scheduler_schedule.start[0].arn
+  source_arn    = aws_scheduler_schedule.start[each.key].arn
 }
 
 resource "aws_scheduler_schedule" "stop" {
-  count = var.enabled ? 1 : 0
+  for_each = var.enabled ? local.stop_schedules : {}
 
-  name       = "${var.name_prefix}-compute-stop"
+  name       = "${var.name_prefix}-compute-stop-${each.key}"
   group_name = "default"
 
-  schedule_expression          = var.stop_schedule_expression
+  schedule_expression          = each.value.expression
   schedule_expression_timezone = var.timezone
 
   flexible_time_window {
@@ -42,12 +42,12 @@ resource "aws_scheduler_schedule" "stop" {
 }
 
 resource "aws_scheduler_schedule" "start" {
-  count = var.enabled ? 1 : 0
+  for_each = var.enabled ? local.start_schedules : {}
 
-  name       = "${var.name_prefix}-compute-start"
+  name       = "${var.name_prefix}-compute-start-${each.key}"
   group_name = "default"
 
-  schedule_expression          = var.start_schedule_expression
+  schedule_expression          = each.value.expression
   schedule_expression_timezone = var.timezone
 
   flexible_time_window {

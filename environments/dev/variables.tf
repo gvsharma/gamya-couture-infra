@@ -121,12 +121,12 @@ variable "db_username" {
 }
 
 # ------------------------------------------------------------------------------
-# Cost scheduler (EC2 + RDS daily stop/start, IST)
+# Cost scheduler (EC2 + RDS stop/start, IST weekly windows)
 # ------------------------------------------------------------------------------
 
 variable "enable_cost_schedule" {
   type        = bool
-  description = "Enable daily EC2+RDS stop (00:00 IST) and start (09:00 IST)."
+  description = "Enable EC2+RDS stop/start schedules (Mon–Fri 06:00–11:00; Sat 18:00–00:00; Sun 06:00–00:00 IST by default)."
   default     = true
 }
 
@@ -136,14 +136,20 @@ variable "schedule_timezone" {
   default     = "Asia/Kolkata"
 }
 
-variable "schedule_stop_expression" {
-  type        = string
-  description = "EventBridge cron for nightly stop (default 12:00 AM in schedule_timezone)."
-  default     = "cron(0 0 * * ? *)"
+variable "schedule_stop_overrides" {
+  type = map(object({
+    expression  = string
+    description = optional(string, "")
+  }))
+  description = "Optional stop rules (key = schedule name). Empty map uses module defaults (Mon–Fri 11:00; Sun/Mon 00:00 IST)."
+  default     = {}
 }
 
-variable "schedule_start_expression" {
-  type        = string
-  description = "EventBridge cron for morning start (default 9:00 AM in schedule_timezone)."
-  default     = "cron(0 9 * * ? *)"
+variable "schedule_start_overrides" {
+  type = map(object({
+    expression  = string
+    description = optional(string, "")
+  }))
+  description = "Optional start rules (key = schedule name). Empty map uses module defaults (Mon–Fri 06:00; Sat 18:00; Sun 06:00 IST)."
+  default     = {}
 }

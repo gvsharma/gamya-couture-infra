@@ -18,8 +18,6 @@ api_port          = 8080
 enable_backend_ssm_deploy = true
 github_backend_repository = "gvsharma/gamyaboutique"
 
-# Cost scheduler: stop 00:00 IST, start 09:00 IST (EC2 + RDS)
-enable_cost_schedule      = true
-schedule_timezone         = "Asia/Kolkata"
-schedule_stop_expression  = "cron(0 0 * * ? *)"
-schedule_start_expression = "cron(0 9 * * ? *)"
+# Cost scheduler: Mon–Fri 06:00–11:00; Sat 18:00–00:00; Sun 06:00–00:00 IST (EC2 + RDS)
+enable_cost_schedule = true
+schedule_timezone    = "Asia/Kolkata"

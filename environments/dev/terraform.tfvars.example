@@ -26,11 +26,9 @@ github_backend_repository = "gvsharma/gamyaboutique"
 db_name     = "gamya"
 db_username = "gamya_admin"
 
-# Daily cost savings: stop 12:00 AM IST, start 9:00 AM IST
-enable_cost_schedule      = true
-schedule_timezone         = "Asia/Kolkata"
-schedule_stop_expression  = "cron(0 0 * * ? *)"
-schedule_start_expression = "cron(0 9 * * ? *)"
+# Cost savings: Mon–Fri 06:00–11:00; Sat 18:00–00:00; Sun 06:00–00:00 IST
+enable_cost_schedule = true
+schedule_timezone  = "Asia/Kolkata"
 
 # Set false to run EC2+RDS 24/7 (e.g. demo week)
 # enable_cost_schedule = false

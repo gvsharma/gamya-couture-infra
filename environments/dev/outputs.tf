@@ -202,14 +202,19 @@ output "cost_schedule_timezone" {
   value       = try(module.scheduler[0].timezone, var.schedule_timezone)
 }
 
-output "cost_schedule_stop_local" {
-  description = "Nightly stop time (IST by default)."
-  value       = try(module.scheduler[0].stop_schedule_local_time, null)
+output "cost_schedule_summary" {
+  description = "Human-readable weekly availability windows (IST by default)."
+  value       = try(module.scheduler[0].schedule_summary, null)
 }
 
-output "cost_schedule_start_local" {
-  description = "Morning start time (IST by default)."
-  value       = try(module.scheduler[0].start_schedule_local_time, null)
+output "cost_schedule_stop_rules" {
+  description = "Stop schedule rules (cron expression + local time)."
+  value       = try(module.scheduler[0].stop_schedules, null)
+}
+
+output "cost_schedule_start_rules" {
+  description = "Start schedule rules (cron expression + local time)."
+  value       = try(module.scheduler[0].start_schedules, null)
 }
 
 output "cost_scheduler_lambda_name" {
@@ -222,14 +227,14 @@ output "cost_scheduler_lambda_arn" {
   value       = try(module.scheduler[0].lambda_function_arn, null)
 }
 
-output "cost_schedule_stop_arn" {
-  description = "EventBridge stop schedule ARN."
-  value       = try(module.scheduler[0].stop_schedule_arn, null)
+output "cost_schedule_stop_arns" {
+  description = "EventBridge stop schedule ARNs (one per rule)."
+  value       = try(module.scheduler[0].stop_schedule_arns, null)
 }
 
-output "cost_schedule_start_arn" {
-  description = "EventBridge start schedule ARN."
-  value       = try(module.scheduler[0].start_schedule_arn, null)
+output "cost_schedule_start_arns" {
+  description = "EventBridge start schedule ARNs (one per rule)."
+  value       = try(module.scheduler[0].start_schedule_arns, null)
 }
 
 # ------------------------------------------------------------------------------
@@ -363,18 +368,29 @@ output "provisioned_resources" {
     }
 
     scheduler = var.enable_cost_schedule ? {
-      enabled        = true
-      timezone       = module.scheduler[0].timezone
-      stop_at        = module.scheduler[0].stop_schedule_local_time
-      start_at       = module.scheduler[0].start_schedule_local_time
-      lambda_name    = module.scheduler[0].lambda_function_name
-      lambda_arn     = module.scheduler[0].lambda_function_arn
-      stop_schedule  = module.scheduler[0].stop_schedule_arn
-      start_schedule = module.scheduler[0].start_schedule_arn
-      schedules_ec2  = module.scheduler[0].schedule_ec2
-      schedules_rds  = module.scheduler[0].schedule_rds
+      enabled         = true
+      timezone        = module.scheduler[0].timezone
+      summary         = module.scheduler[0].schedule_summary
+      stop_rules      = module.scheduler[0].stop_schedules
+      start_rules     = module.scheduler[0].start_schedules
+      lambda_name     = module.scheduler[0].lambda_function_name
+      lambda_arn      = module.scheduler[0].lambda_function_arn
+      stop_schedules  = module.scheduler[0].stop_schedule_arns
+      start_schedules = module.scheduler[0].start_schedule_arns
+      schedules_ec2   = module.scheduler[0].schedule_ec2
+      schedules_rds   = module.scheduler[0].schedule_rds
       } : {
-      enabled = false
+      enabled         = false
+      timezone        = null
+      summary         = null
+      stop_rules      = null
+      start_rules     = null
+      lambda_name     = null
+      lambda_arn      = null
+      stop_schedules  = null
+      start_schedules = null
+      schedules_ec2   = null
+      schedules_rds   = null
     }
 
     spring_boot = {
