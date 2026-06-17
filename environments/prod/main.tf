@@ -153,10 +153,10 @@ module "scheduler" {
   schedule_rds           = true
   schedule_ec2           = true
 
-  timezone                  = var.schedule_timezone
-  stop_schedule_expression  = var.schedule_stop_expression
-  start_schedule_expression = var.schedule_start_expression
-  enabled                   = true
+  timezone        = var.schedule_timezone
+  start_schedules = var.schedule_start_overrides
+  stop_schedules  = var.schedule_stop_overrides
+  enabled         = true
 }
 
 # ------------------------------------------------------------------------------

@@ -8,7 +8,7 @@
 | VPC | `10.50.0.0/16` (public EC2 + private RDS subnets) |
 | EC2 | Amazon Linux 2023, `t3.micro` |
 | RDS | PostgreSQL 17, `db.t4g.micro`, 20 GB gp3 (private) |
-| Scheduler | EC2+RDS stop 00:00 IST / start 09:00 IST |
+| Scheduler | Mon–Fri 06:00–11:00; Sat 18:00–00:00; Sun 06:00–00:00 IST |
 | Backend deploy | S3 JAR bucket + GitHub OIDC → SSM (no SSH from runners) |
 | Product media | Private S3 `gamya-couture-dev-media` + CloudFront CDN (OAC) |
 | Tags | `Owner=Venkat`, `CostOptimization=enabled`, `AutoShutdown=true` |

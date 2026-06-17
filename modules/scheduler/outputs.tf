@@ -8,14 +8,14 @@ output "lambda_function_arn" {
   value       = aws_lambda_function.cost_scheduler.arn
 }
 
-output "stop_schedule_arn" {
-  description = "EventBridge Scheduler ARN for daily stop (null if disabled)."
-  value       = try(aws_scheduler_schedule.stop[0].arn, null)
+output "stop_schedule_arns" {
+  description = "EventBridge Scheduler ARNs for stop rules (null if disabled)."
+  value       = { for k, s in aws_scheduler_schedule.stop : k => s.arn }
 }
 
-output "start_schedule_arn" {
-  description = "EventBridge Scheduler ARN for daily start (null if disabled)."
-  value       = try(aws_scheduler_schedule.start[0].arn, null)
+output "start_schedule_arns" {
+  description = "EventBridge Scheduler ARNs for start rules (null if disabled)."
+  value       = { for k, s in aws_scheduler_schedule.start : k => s.arn }
 }
 
 output "timezone" {
@@ -23,14 +23,31 @@ output "timezone" {
   value       = var.timezone
 }
 
-output "stop_schedule_local_time" {
-  description = "Human-readable stop time in configured timezone."
-  value       = "00:00 daily (${var.timezone})"
+output "stop_schedules" {
+  description = "Configured stop rules (description + cron expression)."
+  value = {
+    for k, v in local.stop_schedules : k => {
+      description = v.description
+      expression  = v.expression
+      local_time  = v.description != "" ? "${v.description} (${var.timezone})" : v.expression
+    }
+  }
 }
 
-output "start_schedule_local_time" {
-  description = "Human-readable start time in configured timezone."
-  value       = "09:00 daily (${var.timezone})"
+output "start_schedules" {
+  description = "Configured start rules (description + cron expression)."
+  value = {
+    for k, v in local.start_schedules : k => {
+      description = v.description
+      expression  = v.expression
+      local_time  = v.description != "" ? "${v.description} (${var.timezone})" : v.expression
+    }
+  }
+}
+
+output "schedule_summary" {
+  description = "Human-readable weekly availability windows in configured timezone."
+  value       = "Mon–Fri 06:00–11:00; Sat 18:00–00:00; Sun 06:00–00:00 (${var.timezone})"
 }
 
 output "schedule_ec2" {

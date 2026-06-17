@@ -113,14 +113,19 @@ output "cost_schedule_enabled" {
   value       = var.enable_cost_schedule
 }
 
-output "cost_schedule_stop_local" {
-  description = "Nightly stop time (IST by default)."
-  value       = try(module.scheduler[0].stop_schedule_local_time, null)
+output "cost_schedule_summary" {
+  description = "Human-readable weekly availability windows (IST by default)."
+  value       = try(module.scheduler[0].schedule_summary, null)
 }
 
-output "cost_schedule_start_local" {
-  description = "Morning start time (IST by default)."
-  value       = try(module.scheduler[0].start_schedule_local_time, null)
+output "cost_schedule_stop_rules" {
+  description = "Stop schedule rules (cron expression + local time)."
+  value       = try(module.scheduler[0].stop_schedules, null)
+}
+
+output "cost_schedule_start_rules" {
+  description = "Start schedule rules (cron expression + local time)."
+  value       = try(module.scheduler[0].start_schedules, null)
 }
 
 output "cost_scheduler_lambda_name" {

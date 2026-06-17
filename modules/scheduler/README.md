@@ -1,15 +1,16 @@
 # scheduler
 
-Daily **EC2 + RDS stop/start** for MVP cost savings using **EventBridge Scheduler** (timezone-aware) and a small **Lambda** (128 MB).
+Weekly **EC2 + RDS stop/start** for MVP cost savings using **EventBridge Scheduler** (timezone-aware) and a small **Lambda** (128 MB).
 
-## Schedule (IST)
+## Schedule (IST / `Asia/Kolkata`)
 
-| Action | Local time | Default cron | Timezone |
-|--------|------------|--------------|----------|
-| **Stop** | 12:00 AM | `cron(0 0 * * ? *)` | `Asia/Kolkata` |
-| **Start** | 9:00 AM | `cron(0 9 * * ? *)` | `Asia/Kolkata` |
+| Day | Running window | Start rule | Stop rule |
+|-----|----------------|------------|-----------|
+| **Mon–Fri** | 06:00–11:00 (5 h) | `cron(0 6 ? * MON-FRI *)` | `cron(0 11 ? * MON-FRI *)` |
+| **Saturday** | 18:00–00:00 (6 h) | `cron(0 18 ? * SAT *)` | `cron(0 0 ? * SUN *)` |
+| **Sunday** | 06:00–00:00 (18 h) | `cron(0 6 ? * SUN *)` | `cron(0 0 ? * MON *)` |
 
-Resources run ~15 hours/day (~62.5% compute savings on EC2 + RDS). Storage (gp3) still bills while RDS exists.
+Six EventBridge Scheduler rules (3 start + 3 stop). Storage (gp3) still bills while RDS exists.
 
 ## Dependency order
 
@@ -46,14 +47,14 @@ module "scheduler" {
 
   name_prefix            = "gamya-couture-dev"
   db_instance_identifier = module.rds.db_instance_id
-  db_instance_arn        = module.rds.db_instance_arn
   ec2_instance_id        = module.ec2.instance_id
-  ec2_instance_arn       = module.ec2.instance_arn
 
-  timezone                  = "Asia/Kolkata"
-  stop_schedule_expression  = "cron(0 0 * * ? *)"
-  start_schedule_expression = "cron(0 9 * * ? *)"
-  enabled                   = var.enable_cost_schedule
+  timezone = "Asia/Kolkata"
+  enabled  = var.enable_cost_schedule
+
+  # Optional: override built-in weekly defaults
+  # start_schedules = { ... }
+  # stop_schedules  = { ... }
 }
 ```
 
@@ -62,8 +63,8 @@ module "scheduler" {
 | Name | Default | Description |
 |------|---------|-------------|
 | `timezone` | `Asia/Kolkata` | IANA timezone for cron |
-| `stop_schedule_expression` | `cron(0 0 * * ? *)` | Midnight stop |
-| `start_schedule_expression` | `cron(0 9 * * ? *)` | 9 AM start |
+| `start_schedules` | Built-in Mon–Sun windows | Map of start rules (empty = defaults) |
+| `stop_schedules` | Built-in Mon–Sun windows | Map of stop rules (empty = defaults) |
 | `enabled` | `true` | Create schedules |
 | `ec2_instance_id` | `""` | Skip EC2 when empty |
 | `db_instance_identifier` | `""` | Skip RDS when empty |
@@ -75,7 +76,7 @@ Set `enable_cost_schedule = false` in environment tfvars. Lambda/IAM remain; Eve
 
 ## Operational notes
 
-1. **API impact:** EC2 and RDS are down 00:00–09:00 IST. Vercel frontend still serves static pages; API returns errors until 09:00.
+1. **API impact:** EC2 and RDS are down outside the weekly windows above. Vercel frontend still serves static pages; API returns errors until the next start rule fires.
 2. **Logs:** CloudWatch `/aws/lambda/<name-prefix>-cost-scheduler`
 3. **Manual override (Terraform-managed resources only):**
    ```bash
@@ -87,8 +88,8 @@ Set `enable_cost_schedule = false` in environment tfvars. Lambda/IAM remain; Eve
 
 | Component | ~USD/mo |
 |-----------|---------|
-| EventBridge Scheduler | ~$0 (2 daily rules) |
-| Lambda (2 invocations/day) | ~$0 |
+| EventBridge Scheduler | ~$0 (6 weekly rules) |
+| Lambda (6 invocations/day max) | ~$0 |
 | CloudWatch Logs (3d) | ~$0.05 |
 
 Savings come from **EC2 + RDS compute** while stopped.
@@ -98,6 +99,7 @@ Savings come from **EC2 + RDS compute** while stopped.
 | File | Purpose |
 |------|---------|
 | `lambda/handler.py` | Stop/start logic with dependency ordering |
+| `locals.tf` | Default start/stop cron expressions |
 | `schedules.tf` | EventBridge Scheduler rules |
 | `iam.tf` | Lambda + Scheduler roles |
 | `lambda.tf` | Function + log group |
