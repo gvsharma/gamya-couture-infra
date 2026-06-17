@@ -27,7 +27,7 @@ Environment: [`environments/dev`](../environments/dev/) (dev only)
 | Module | Purpose | Status |
 |--------|---------|--------|
 | [rds](./rds/) | PostgreSQL 16 | **Active** |
-| [scheduler](./scheduler/) | EC2 + RDS stop/start (00:00–09:00 IST) | **Active** |
+| [scheduler](./scheduler/) | EC2 + RDS stop/start (weekly IST windows) | **Active** |
 | [s3](./s3/) | Frontend + media buckets | **Active** |
 
 ## Edge & DNS (active)
