@@ -380,7 +380,17 @@ output "provisioned_resources" {
       schedules_ec2   = module.scheduler[0].schedule_ec2
       schedules_rds   = module.scheduler[0].schedule_rds
       } : {
-      enabled = false
+      enabled         = false
+      timezone        = null
+      summary         = null
+      stop_rules      = null
+      start_rules     = null
+      lambda_name     = null
+      lambda_arn      = null
+      stop_schedules  = null
+      start_schedules = null
+      schedules_ec2   = null
+      schedules_rds   = null
     }
 
     spring_boot = {
